@@ -3,7 +3,10 @@ import 'package:atgs_app/pages/map.dart';
 import 'package:atgs_app/pages/profile.dart';
 import 'package:atgs_app/pages/device.dart';
 
-const backgroundColor = Color.fromARGB(255, 14, 147, 187);
+const backgroundColor = Color.fromARGB(255, 29, 174, 239);
+bool deviceArmed = true;
+int batteryStatus = 99;
+bool signalConnection = true;
 
 List<Widget> widgetOptions = const <Widget>[
   MapPage(),
@@ -24,7 +27,7 @@ class AppViewState extends State<AppView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 14, 147, 187),
+        backgroundColor: backgroundColor,
         leading: const Badge(child: Icon(Icons.directions_bike, size: 60)),
       ),
       body: Center(
