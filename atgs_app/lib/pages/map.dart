@@ -11,6 +11,7 @@ class MapPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            const SizedBox(height: 50),
             ElevatedButton(
               style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(20)),
               onPressed: () {      
