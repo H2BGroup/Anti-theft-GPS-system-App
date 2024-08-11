@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 const backgroundColor = Color.fromARGB(255, 14, 147, 187);
 
-class MapPage extends StatelessWidget {
-  const MapPage({super.key});
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class MapPage extends StatelessWidget {
               onPressed: () {      
                 
               },
-              child: Text("Show my bike",
+              child: Text("Profile",
                   style: TextStyle(foreground: Paint() ..color = backgroundColor, fontSize: 25, fontWeight: FontWeight.w900)),
             ),
           ]
