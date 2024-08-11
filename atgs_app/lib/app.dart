@@ -1,40 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:atgs_app/pages/map.dart';
+import 'package:atgs_app/pages/profile.dart';
+import 'package:atgs_app/pages/device.dart';
 
 const backgroundColor = Color.fromARGB(255, 14, 147, 187);
 
-List<Widget> widgetOptions = <Widget>[
-    Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(20)),
-              onPressed: () {      
-                
-              },
-              child: Text("Show my bike",
-                  style: TextStyle(foreground: Paint() ..color = backgroundColor, fontSize: 25, fontWeight: FontWeight.w900)),
-            ),
-          ]
-        )
-      ),
-    Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text("Device", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 25, fontWeight: FontWeight.w900)),
-          ]
-        )
-      ),
-    Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text("Profile", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 25, fontWeight: FontWeight.w900)),
-          ]
-        )
-      ),
-  ];
+List<Widget> widgetOptions = const <Widget>[
+  MapPage(),
+  DevicePage(),
+  ProfilePage(),
+];
 
 class AppView extends StatefulWidget {
   const AppView({super.key});

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:atgs_app/view.dart';
+import 'package:atgs_app/app.dart';
 
 void main() {
   runApp(const MyApp());
