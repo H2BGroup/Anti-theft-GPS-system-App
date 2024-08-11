@@ -31,6 +31,31 @@ class MapPage extends StatelessWidget {
           ]
         )
       ),
+bottomNavigationBar: BottomNavigationBar(
+        items: const [
+           BottomNavigationBarItem(
+              icon: Badge(child: Icon(Icons.location_pin)),
+              label: 'Map'),           
+          BottomNavigationBarItem(
+              icon: Badge(child: Icon(Icons.settings)),
+              label: 'Device'),
+          BottomNavigationBarItem(
+              icon: Badge(child: Icon(Icons.person)),
+              label: 'Profile'),
+        ],
+        selectedIconTheme: const IconThemeData(color: backgroundColor, size: 32),
+      //  selectedItemColor: backgroundColor,
+        unselectedIconTheme: const IconThemeData(color: Colors.grey, size: 32),
+      //  unselectedItemColor: Colors.grey,
+        selectedLabelStyle: TextStyle(foreground: Paint() ..color = backgroundColor, fontWeight: FontWeight.w700, fontSize: 15),
+        unselectedLabelStyle: TextStyle(foreground: Paint() ..color = Colors.grey, fontWeight: FontWeight.w700, fontSize: 15),
+
+        backgroundColor: Colors.white,
+       // elevation: 0,
+        onTap: (i) => {
+        },
+      ),
+
     );
   }
 }
