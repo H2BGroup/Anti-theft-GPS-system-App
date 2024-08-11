@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:atgs_app/pages/map.dart';
+import 'package:atgs_app/view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
         scaffoldBackgroundColor: backgroundColor,
       ),
-      home: const MapPage(),
+      home: const AppView(),
     );
   }
 }
