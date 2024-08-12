@@ -28,7 +28,7 @@ class AppViewState extends State<AppView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: backgroundColor,
-        leading: const Badge(child: Icon(Icons.directions_bike, size: 60)),
+        leading: const Badge(isLabelVisible: false, child: Icon(Icons.directions_bike, size: 60)),
       ),
       body: Center(
         child: widgetOptions.elementAt(selectedIndex),
@@ -36,13 +36,13 @@ class AppViewState extends State<AppView> {
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
-              icon: Badge(child: Icon(Icons.location_pin)),
+              icon: Badge(isLabelVisible: false, child: Icon(Icons.location_pin)),
               label: 'Map'),           
           BottomNavigationBarItem(
-              icon: Badge(child: Icon(Icons.settings)),
+              icon: Badge(isLabelVisible: false, child: Icon(Icons.settings)),
               label: 'Device'),
           BottomNavigationBarItem(
-              icon: Badge(child: Icon(Icons.person)),
+              icon: Badge(isLabelVisible: false, child: Icon(Icons.person)),
               label: 'Profile'),
         ],
         selectedIconTheme: const IconThemeData(color: backgroundColor, size: 32),
