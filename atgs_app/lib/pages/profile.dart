@@ -1,9 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:atgs_app/app.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+  
+    @override
+  State<ProfilePage> createState() => ProfilePageState();
+}
+
+class ProfilePageState extends State<ProfilePage> {
+  TextEditingController datePickerController = TextEditingController();
+
+  onTapFunction({required BuildContext context}) async {
+  DateTime? pickedDate = await showDatePicker(
+    context: context,
+    lastDate: DateTime(2030),
+    firstDate: DateTime(2024),
+    initialDate: DateTime.now(),
+  );
+  if (pickedDate == null) return;
+  datePickerController.text = DateFormat('dd MMMM, yyyy').format(pickedDate);
+}
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +35,9 @@ class ProfilePage extends StatelessWidget {
             Text("Profile settings", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
             const SizedBox(height: 80),
             Text( "Device phone number", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
+            
             SizedBox(
-              width: 250,
+              width: 220,
               height: 75,
               child: 
                 TextField(
@@ -39,6 +59,26 @@ class ProfilePage extends StatelessWidget {
               ),
             const SizedBox(height: 80),
             Text( "Subscription expires on", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
+            
+            SizedBox(
+              width: 250,
+              height: 75,
+              child: 
+                TextField(
+                    style: TextStyle(fontWeight: FontWeight.w700, foreground: Paint() ..color = Colors.white, fontSize: 20),
+                    cursorColor: darkestBlue,
+                    textAlign: TextAlign.center,
+                    controller: datePickerController,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),
+                      focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),                 
+                      hintText: "Click here to select date",
+                      hintStyle: TextStyle(fontWeight: FontWeight.w500, foreground: Paint() ..color = Colors.white, fontSize: 20, fontStyle: FontStyle.italic)
+                      ),
+                    onTap: () => onTapFunction(context: context),
+                )
+             ),
            ]
         )
       ),
