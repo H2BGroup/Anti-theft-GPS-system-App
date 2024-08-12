@@ -4,9 +4,14 @@ import 'package:atgs_app/pages/profile.dart';
 import 'package:atgs_app/pages/device.dart';
 
 const backgroundColor = Color.fromARGB(255, 29, 174, 239);
+const darkestBlue = Color.fromARGB(255, 9, 113, 160);
+const darkBlue = Color.fromARGB(255, 21, 144, 199);
+const lightBlue =Color.fromARGB(255, 151, 222, 254);
+
 bool deviceArmed = true;
 int batteryStatus = 99;
 bool signalConnection = true;
+String deviceNumber = "690295512";
 
 List<Widget> widgetOptions = const <Widget>[
   MapPage(),

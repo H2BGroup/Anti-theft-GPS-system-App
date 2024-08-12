@@ -1,10 +1,6 @@
 import 'package:atgs_app/app.dart';
 import 'package:flutter/material.dart';
 
-const darkestBlue = Color.fromARGB(255, 9, 113, 160);
-const darkBlue = Color.fromARGB(255, 21, 144, 199);
-const lightBlue =Color.fromARGB(255, 151, 222, 254);
-
 class DevicePage extends StatefulWidget {
   const DevicePage({super.key});
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-const buttonColor = Color.fromARGB(255, 21, 144, 199);
+import 'package:atgs_app/app.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -20,12 +19,12 @@ class MapPageState extends State<MapPage> {
           children: [
             const SizedBox(height: 20),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(20), side: const BorderSide(color: buttonColor, width: 5)),
+              style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(20), side: const BorderSide(color: darkBlue, width: 5)),
               onPressed: () {      
                 
               },
               child: Text("Show my bike",
-                  style: TextStyle(foreground: Paint() ..color = buttonColor, fontSize: 25, fontWeight: FontWeight.w900)),
+                  style: TextStyle(foreground: Paint() ..color = darkBlue, fontSize: 25, fontWeight: FontWeight.w900)),
             ),              
           ]
         )
