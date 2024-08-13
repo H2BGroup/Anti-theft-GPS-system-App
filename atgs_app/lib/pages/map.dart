@@ -32,19 +32,14 @@ class MapPageState extends State<MapPage> {
           children: [
             FlutterMap(
               mapController: mapController,
-              options: MapOptions(
-                center: mapLatLng,
-                zoom: mapZoom,
-                maxZoom: 18,
-                minZoom: 11,
-              ),
+              options: MapOptions(center: mapLatLng, zoom: mapZoom, maxZoom: 18, minZoom: 11),
               children: [
                 TileLayer(
                   urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                   subdomains: const ['a', 'b', 'c'],
                   userAgentPackageName: 'com.example.app',
-                ),
-              ],
+                )
+              ]
             ),
 
             Align(
@@ -52,24 +47,17 @@ class MapPageState extends State<MapPage> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 80),
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(20),
-                    side: const BorderSide(color: backgroundColor, width: 5),
-                  ),
+                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(20), side: const BorderSide(color: backgroundColor, width: 5)),
                   onPressed: showDeviceLocation,
                   child: Text(
                     "Show my bike",
-                    style: TextStyle(
-                      foreground: Paint()..color = backgroundColor,
-                      fontSize: 25,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
+                    style: TextStyle(foreground: Paint()..color = backgroundColor, fontSize: 25, fontWeight: FontWeight.w900)
+                  )
+                )
               )
-            ),
-          ],
-        ),
+            )
+          ]
+        )
     );
   }
 }
