@@ -32,12 +32,12 @@ class AppViewState extends State<AppView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: backgroundColor,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: const Badge(isLabelVisible: false, child: Icon(Icons.directions_bike, size: 60)),
       ),
-      body: Center(
-        child: widgetOptions.elementAt(selectedIndex),
-      ),
+      extendBodyBehindAppBar: true,
+      body: widgetOptions.elementAt(selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
