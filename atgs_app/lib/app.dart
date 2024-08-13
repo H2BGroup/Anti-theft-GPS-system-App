@@ -7,6 +7,7 @@ const backgroundColor = Color.fromARGB(255, 29, 174, 239);
 const darkestBlue = Color.fromARGB(255, 9, 113, 160);
 const darkBlue = Color.fromARGB(255, 21, 144, 199);
 const lightBlue =Color.fromARGB(255, 151, 222, 254);
+const lightGrey = Color.fromARGB(255, 231, 230, 230);
 
 bool deviceArmed = true;
 int batteryStatus = 99;
@@ -37,7 +38,25 @@ class AppViewState extends State<AppView> {
         leading: const Badge(isLabelVisible: false, child: Icon(Icons.directions_bike, size: 60)),
       ),
       extendBodyBehindAppBar: true,
-      body: widgetOptions.elementAt(selectedIndex),
+      body: Stack(
+        children: [
+          widgetOptions.elementAt(selectedIndex),
+          Positioned(
+            bottom: 0, 
+            left: 0,
+            right: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                    height: 35,
+                    decoration: const BoxDecoration(color: lightGrey, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+                  )
+              ]
+            )
+          )
+        ]
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(

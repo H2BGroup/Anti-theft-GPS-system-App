@@ -12,6 +12,17 @@ class MapPage extends StatefulWidget {
 }
 
 class MapPageState extends State<MapPage> {
+  LatLng mapLatLng = const LatLng(54.35, 18.61);
+  double mapZoom = 18;
+
+  final MapController mapController = MapController();
+
+  void changeLocation() {
+    setState(() {
+      mapLatLng = const LatLng(40.712776, -74.005974);
+    });
+    mapController.move(mapLatLng, mapZoom);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +30,10 @@ class MapPageState extends State<MapPage> {
       body: Stack(
           children: [
             FlutterMap(
+              mapController: mapController,
               options: MapOptions(
-                center: const LatLng(54.35, 18.61),
-                zoom: 18,
+                center: mapLatLng,
+                zoom: mapZoom,
               ),
               children: [
                 TileLayer(
@@ -39,15 +51,13 @@ class MapPageState extends State<MapPage> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(20),
-                    side: const BorderSide(color: Colors.blue, width: 5),
+                    side: const BorderSide(color: backgroundColor, width: 5),
                   ),
-                  onPressed: () {
-
-                  },
+                  onPressed: changeLocation,
                   child: Text(
                     "Show my bike",
                     style: TextStyle(
-                      foreground: Paint()..color = Colors.blue,
+                      foreground: Paint()..color = backgroundColor,
                       fontSize: 25,
                       fontWeight: FontWeight.w900,
                     ),

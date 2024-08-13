@@ -18,7 +18,7 @@ class DevicePageState extends State<DevicePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           
           children: [
-            const SizedBox(height: 50),
+            const SizedBox(height: 80),
             Text("Device status", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
             const SizedBox(height: 80),
             Text( (deviceArmed) ? "Device: Armed" : "Device: Disarmed", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
