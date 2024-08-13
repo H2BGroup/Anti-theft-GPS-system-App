@@ -12,14 +12,15 @@ class MapPage extends StatefulWidget {
 }
 
 class MapPageState extends State<MapPage> {
-  LatLng mapLatLng = const LatLng(54.35, 18.61);
+  LatLng mapLatLng = const LatLng(40.712776, -74.005974);
   double mapZoom = 18;
 
   final MapController mapController = MapController();
 
-  void changeLocation() {
+  void showDeviceLocation() {
     setState(() {
       mapLatLng = const LatLng(40.712776, -74.005974);
+      mapZoom = 18;
     });
     mapController.move(mapLatLng, mapZoom);
   }
@@ -34,6 +35,8 @@ class MapPageState extends State<MapPage> {
               options: MapOptions(
                 center: mapLatLng,
                 zoom: mapZoom,
+                maxZoom: 18,
+                minZoom: 11,
               ),
               children: [
                 TileLayer(
@@ -53,7 +56,7 @@ class MapPageState extends State<MapPage> {
                     padding: const EdgeInsets.all(20),
                     side: const BorderSide(color: backgroundColor, width: 5),
                   ),
-                  onPressed: changeLocation,
+                  onPressed: showDeviceLocation,
                   child: Text(
                     "Show my bike",
                     style: TextStyle(
