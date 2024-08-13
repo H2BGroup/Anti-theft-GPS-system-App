@@ -10,7 +10,7 @@ const lightBlue =Color.fromARGB(255, 151, 222, 254);
 const lightGrey = Color.fromARGB(255, 231, 230, 230);
 
 bool deviceArmed = true;
-int batteryStatus = 99;
+int batteryStatus = 79;
 bool signalConnection = true;
 String deviceNumber = "690295512";
 
