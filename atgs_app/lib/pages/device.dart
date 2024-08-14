@@ -47,18 +47,18 @@ IconData returnBatteryStatusIcon() {
             margin: const EdgeInsets.only(top: 50),
             constraints: const BoxConstraints(maxHeight: 570),
             width: 330,
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(10.0),
             decoration: BoxDecoration(color: darkBlue, borderRadius: BorderRadius.circular(25),border: Border.all(color: darkestBlue, width: 5)),
             child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             
             children: [
               Text("Device status", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
-              const SizedBox(height: 30),
+              const SizedBox(height: 45),
 
               Container(
                 padding: const EdgeInsets.all(10.0),
-                width: 230,
+                width: 330,
                 decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(25),border: Border.all(color: darkestBlue, width: 3)),
                 child: Column(
                   children: [
@@ -87,11 +87,11 @@ IconData returnBatteryStatusIcon() {
                   ],
                 )
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 45),
 
               Container(
                 padding: const EdgeInsets.all(15.0),
-                width: 230,
+                width: 330,
                 decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(25),border: Border.all(color: darkestBlue, width: 3)),
                 child: Column(
                   children: [
@@ -99,18 +99,17 @@ IconData returnBatteryStatusIcon() {
                     Badge(isLabelVisible: false, child: Icon( returnBatteryStatusIcon(), color: darkestBlue, size: 35)),
                   ]
                 )
-              ),
-              
-              const SizedBox(height: 30),
+              ),         
+              const SizedBox(height: 45),
 
               Container(
                 padding: const EdgeInsets.all(15.0),
-                width: 230,
+                width: 330,
                 decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(25),border: Border.all(color: darkestBlue, width: 3)),
                 child: Column(
                   children: [
                     Text( (signalConnection) ? "Signal: Available" : "Signal: Lost connection", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
-                    Badge(isLabelVisible: false, child: Icon( signalConnection ? Icons.signal_cellular_4_bar : Icons.signal_cellular_off, color: darkestBlue, size: 35)),                  
+                    Badge(isLabelVisible: false, child: Icon( signalConnection ? Icons.signal_cellular_alt_rounded : Icons.signal_cellular_off_rounded, color: darkestBlue, size: 35)),                  
                   ]
                 )
               )   

@@ -11,7 +11,7 @@ const lightGrey = Color.fromARGB(255, 231, 230, 230);
 
 bool deviceArmed = true;
 int batteryStatus = 79;
-bool signalConnection = true;
+bool signalConnection = false;
 String deviceNumber = "690295512";
 
 List<Widget> widgetOptions = const <Widget>[
