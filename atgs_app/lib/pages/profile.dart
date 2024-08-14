@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atgs_app/app.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -12,6 +12,22 @@ class ProfilePage extends StatefulWidget {
 
 class ProfilePageState extends State<ProfilePage> {
   TextEditingController datePickerController = TextEditingController();
+  static const String dateKey = "selectedDate";
+
+  void saveDate(String date) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(dateKey, date);
+  }
+
+  void loadSavedDate() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedDate = prefs.getString(dateKey);
+    if (savedDate != null) {
+      setState(() {
+        datePickerController.text = savedDate;
+      });
+    }
+  }
 
   onTapFunction({required BuildContext context}) async {
     DateTime? pickedDate = await showDatePicker(
@@ -22,7 +38,14 @@ class ProfilePageState extends State<ProfilePage> {
     );
     if (pickedDate == null) return;
     datePickerController.text = DateFormat('dd MMMM, yyyy').format(pickedDate);
+    saveDate(DateFormat('dd MMMM, yyyy').format(pickedDate));
 }
+
+@override
+  void initState() {
+    super.initState();
+    loadSavedDate(); 
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +63,7 @@ class ProfilePageState extends State<ProfilePage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text("Profile settings", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
-                const SizedBox(height: 80),
+                const SizedBox(height: 60),
 
                 Container(
                   padding: const EdgeInsets.all(10.0),
@@ -49,32 +72,20 @@ class ProfilePageState extends State<ProfilePage> {
                   child: Column(
                     children: [
                       Text( "Device phone number", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
-                      
-                      SizedBox(
-                        width: 220,
-                        height: 75,
-                        child: 
-                          TextField(
-                            style: TextStyle(fontWeight: FontWeight.w700, foreground: Paint() ..color = Colors.white, fontSize: 20),
-                            cursorColor: darkestBlue,
-                            textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))
-                            ],
-                            decoration: InputDecoration(
-                              enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),
-                              focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),
-                              hintText: deviceNumber,
-                              hintStyle: TextStyle(fontWeight: FontWeight.w700, foreground: Paint() ..color = Colors.white, fontSize: 20)
-                            ),
-                            maxLength: 9,
-                          ),
-                       ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const SizedBox(width: 50),
+                          const Badge(isLabelVisible: false, child: Icon(Icons.phone_in_talk, color: darkestBlue, size: 35)),
+                          const SizedBox(width: 10),
+                          Text( deviceNumber, style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)), 
+                        ]
+                      )
                     ]
                   )
                 ),
-                const SizedBox(height: 80),
+                const SizedBox(height: 90),
 
                 Container(
                   padding: const EdgeInsets.all(10.0),
@@ -83,7 +94,7 @@ class ProfilePageState extends State<ProfilePage> {
                   child: Column(
                     children: [
                       Text( "Subscription expires on", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
-                      
+                      const SizedBox(height: 10),
                       SizedBox(
                         width: 250,
                         height: 75,
