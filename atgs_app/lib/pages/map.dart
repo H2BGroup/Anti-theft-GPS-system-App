@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -12,15 +13,26 @@ class MapPage extends StatefulWidget {
 class MapPageState extends State<MapPage> {
   LatLng mapLatLng = const LatLng(40.712776, -74.005974);
   double mapZoom = 18;
+  double mapRotation = 0;
 
   final MapController mapController = MapController();
 
-  void showDeviceLocation() {
-    setState(() {
-      mapLatLng = const LatLng(40.712776, -74.005974);
-      mapZoom = 18;
-    });
+  Future<void> showDeviceLocation() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    double? latitude = prefs.getDouble("latitude");
+    double? longitude = prefs.getDouble("longitude");
+    print(latitude);
+    print(longitude);
+    if (latitude != null && longitude != null) {
+      setState(() {
+        mapLatLng = LatLng(latitude, longitude);
+        mapZoom = 18;
+        mapRotation= 0;
+      });
+    }
     mapController.move(mapLatLng, mapZoom);
+    mapController.rotate(mapRotation);
   }
 
   @override
@@ -46,7 +58,7 @@ class MapPageState extends State<MapPage> {
               MarkerLayer(
                 markers: [
                   Marker(
-                    point: LatLng(40.712776, -74.005974),
+                    point: mapLatLng,
                     width: 80,
                     height: 80,
                     builder: (context) {
