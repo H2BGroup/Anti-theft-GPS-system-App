@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atgs_app/message_service.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -11,13 +13,20 @@ class MapPage extends StatefulWidget {
 }
 
 class MapPageState extends State<MapPage> {
-  LatLng mapLatLng = const LatLng(40.712776, -74.005974);
-  double mapZoom = 18;
+  LatLng mapLatLng = const LatLng(50.22718711817035, 22.91607329997953);
+  double mapZoom = 17;
   double mapRotation = 0;
+  bool initial = true;
 
   final MapController mapController = MapController();
 
-  Future<void> showDeviceLocation() async {
+  void showDeviceLocation() {
+    sendMessage("location");
+    mapController.move(mapLatLng, mapZoom);
+    mapController.rotate(mapRotation);
+  }
+
+  void updateLocation() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.reload();
     double? latitude = prefs.getDouble("latitude");
@@ -27,12 +36,22 @@ class MapPageState extends State<MapPage> {
     if (latitude != null && longitude != null) {
       setState(() {
         mapLatLng = LatLng(latitude, longitude);
-        mapZoom = 18;
-        mapRotation= 0;
       });
     }
-    mapController.move(mapLatLng, mapZoom);
-    mapController.rotate(mapRotation);
+    if (initial) {
+      mapController.move(mapLatLng, mapZoom);
+      initial = false;
+    }
+  }
+
+  late Timer timer;
+  @override
+  void initState() {
+    updateLocation();
+    timer = Timer.periodic(const Duration(seconds: 3), (t) {
+      updateLocation();
+    });
+    super.initState();
   }
 
   @override
