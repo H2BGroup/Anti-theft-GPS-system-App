@@ -12,7 +12,9 @@ void main() {
 }
 
 void startMessageService(_) {
-  message();
+  receiveMessage();
+  sendMessage("location");
+  sendMessage("status");
 }
 
 class MyApp extends StatelessWidget {
