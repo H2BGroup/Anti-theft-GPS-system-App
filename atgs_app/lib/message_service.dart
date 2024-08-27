@@ -25,10 +25,12 @@ void receiveMessage() async {
         if (message.payloadAsJson['latitude'] != null && message.payloadAsJson['longitude'] != null) {
           double latitude = double.parse(message.payloadAsJson['latitude']);
           double longitude = double.parse(message.payloadAsJson['longitude']);
+          String dateTime = message.payloadAsJson['utc_time'];
           print("latitude $latitude");
           print("longitude $longitude");
+          print("date $dateTime");
 
-          saveLocation(latitude, longitude);
+          saveLocation(latitude, longitude, dateTime);
         }
       }
       else if (message.payloadAsJson['type'] == 'status') {
@@ -54,8 +56,9 @@ void sendMessage(String type) async {
     }
 }
 
-void saveLocation(double latitude, double longitude) async {
+void saveLocation(double latitude, double longitude, String dateTime) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.setDouble("latitude", latitude);
   await prefs.setDouble("longitude", longitude);
+  await prefs.setString("utc_time", dateTime);
 }
