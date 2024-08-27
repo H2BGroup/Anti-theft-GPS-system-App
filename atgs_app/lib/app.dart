@@ -12,7 +12,6 @@ const lightGrey = Color.fromARGB(255, 231, 230, 230);
 bool deviceArmed = true;
 int batteryStatus = 79;
 bool signalConnection = false;
-String deviceNumber = "+48690295512";
 
 List<Widget> widgetOptions = const <Widget>[
   MapPage(),
@@ -27,7 +26,7 @@ class AppView extends StatefulWidget {
   State<AppView> createState() => AppViewState();
 }
 class AppViewState extends State<AppView> {
-  int selectedIndex = 0;
+  static int selectedIndex = 0;
   
   @override
   Widget build(BuildContext context) {

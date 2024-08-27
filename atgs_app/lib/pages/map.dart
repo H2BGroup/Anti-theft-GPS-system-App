@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atgs_app/message_service.dart';
+import 'package:atgs_app/app.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -28,19 +29,22 @@ class MapPageState extends State<MapPage> {
 
   void updateLocation() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.reload();
-    double? latitude = prefs.getDouble("latitude");
-    double? longitude = prefs.getDouble("longitude");
-    print(latitude);
-    print(longitude);
-    if (latitude != null && longitude != null) {
-      setState(() {
-        mapLatLng = LatLng(latitude, longitude);
-      });
-    }
-    if (initial) {
-      mapController.move(mapLatLng, mapZoom);
-      initial = false;
+    
+    if(AppViewState.selectedIndex == 0) {
+      await prefs.reload();
+      double? latitude = prefs.getDouble("latitude");
+      double? longitude = prefs.getDouble("longitude");
+      print(latitude);
+      print(longitude);
+      if (latitude != null && longitude != null && mounted) {
+        setState(() {
+          mapLatLng = LatLng(latitude, longitude);
+        });
+      }
+      if (initial) {
+        mapController.move(mapLatLng, mapZoom);
+        initial = false;
+      }
     }
   }
 

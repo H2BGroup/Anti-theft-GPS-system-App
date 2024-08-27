@@ -4,10 +4,8 @@ import 'package:atgs_app/app.dart';
 import 'message_service.dart';
 
 void main() {
-  // Start the message service in a separate isolate
   WidgetsFlutterBinding.ensureInitialized();
   FlutterIsolate.spawn(startMessageService, null);
-
   runApp(const MyApp());
 }
 
@@ -23,9 +21,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        scaffoldBackgroundColor: backgroundColor,
-      ),
+      theme: ThemeData( scaffoldBackgroundColor: backgroundColor),
       home: const AppView(),
     );
   }
