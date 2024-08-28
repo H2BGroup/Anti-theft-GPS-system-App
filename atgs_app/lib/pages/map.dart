@@ -21,6 +21,7 @@ class MapPageState extends State<MapPage> {
   bool initial = true;
   bool showTimestamp = false;
   DateTime? date;
+  double timeStampBoxOpacity = 1.0;
 
   final MapController mapController = MapController();
 
@@ -39,8 +40,10 @@ class MapPageState extends State<MapPage> {
       double? longitude = prefs.getDouble("longitude");
       String? stringDate = prefs.getString("utc_time");
 
-      print(latitude);
-      print(longitude);
+      debugPrint("-UPDATE- Latitude: $latitude");
+      debugPrint("-UPDATE- Longitude: $longitude");
+      debugPrint("-UPDATE- Date: $stringDate");
+
       if (latitude != null && longitude != null && mounted) {
         setState(() {
           mapLatLng = LatLng(latitude, longitude);
@@ -61,12 +64,22 @@ class MapPageState extends State<MapPage> {
   onTapMarker ({required BuildContext context}) async {
     setState(() {
       showTimestamp = true;
+      timeStampBoxOpacity = 1.0;
     });
-
-    Timer(const Duration(seconds: 3), () {
-      setState(() {
-        showTimestamp = false;
-      });
+    
+    Timer(const Duration(seconds: 1), () {
+      if(AppViewState.selectedIndex == 0){
+        setState(() {
+          timeStampBoxOpacity = 0.0;
+        });
+        Timer(const Duration(seconds: 1), () {
+          if(AppViewState.selectedIndex == 0){
+            setState(() {
+              showTimestamp = false;
+            });
+          }
+        });
+      }   
     });
   }
 
@@ -74,7 +87,7 @@ class MapPageState extends State<MapPage> {
   @override
   void initState() {
     updateLocation();
-    timer = Timer.periodic(const Duration(seconds: 3), (t) {
+    timer = Timer.periodic(const Duration(seconds: 5), (t) {
       updateLocation();
     });
     super.initState();
@@ -147,15 +160,18 @@ class MapPageState extends State<MapPage> {
                             if (showTimestamp) 
                               Positioned(
                                 bottom: 70,
-                                child: Container(
-                                  padding: const EdgeInsets.all(10.0),
-                                  decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(10.0), border: Border.all(color: darkBlue, width: 2)),
-                                  child: Column(
-                                    children: [
-                                      Text("${mapLatLng.latitude}, ${mapLatLng.longitude}", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
-                                      Text(DateFormat('HH:mm   dd.MM.yyyy').format(date!), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontStyle: FontStyle.italic)),
-                                  ],) 
-                                  
+                                child: AnimatedOpacity(
+                                  duration: const Duration(seconds: 1),
+                                  opacity: timeStampBoxOpacity,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10.0),
+                                    decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(10.0), border: Border.all(color: darkBlue, width: 2)),
+                                    child: Column(
+                                      children: [
+                                        Text("${mapLatLng.latitude}, ${mapLatLng.longitude}", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+                                        Text( (date != null) ? DateFormat('HH:mm   dd.MM.yyyy').format(date!) : "N/A", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontStyle: FontStyle.italic)),
+                                    ],)   
+                                  )
                                 )
                               ),
                           ]

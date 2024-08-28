@@ -1,5 +1,6 @@
 import "package:atgs_app/pages/profile.dart";
 import "package:dart_amqp/dart_amqp.dart";
+import "package:flutter/material.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "config.dart";
 
@@ -19,22 +20,34 @@ void receiveMessage() async {
     Queue queue = await channel.queue(ownersNumber, durable: true);
     Consumer consumer = await queue.consume();
     consumer.listen((AmqpMessage message) {
-      print(" [x] Received json: ${message.payloadAsJson}");
+      debugPrint(" [x] Received json: ${message.payloadAsJson}");
 
       if (message.payloadAsJson['type'] == 'location') {
-        if (message.payloadAsJson['latitude'] != null && message.payloadAsJson['longitude'] != null) {
+        if (message.payloadAsJson['latitude'] != null && message.payloadAsJson['longitude'] != null && message.payloadAsJson['utc_time'] != null) {
           double latitude = double.parse(message.payloadAsJson['latitude']);
           double longitude = double.parse(message.payloadAsJson['longitude']);
           String dateTime = message.payloadAsJson['utc_time'];
-          print("latitude $latitude");
-          print("longitude $longitude");
-          print("date $dateTime");
+
+          debugPrint("-RECEIVED- Latitude: $latitude");
+          debugPrint("-RECEIVED- Longitude: $longitude");
+          debugPrint("-RECEIVED- Date: $dateTime");
 
           saveLocation(latitude, longitude, dateTime);
         }
       }
-      else if (message.payloadAsJson['type'] == 'status') {
-        if (message.payloadAsJson['battery'] != null) {}
+
+      if (message.payloadAsJson['type'] == 'status') {
+        if (message.payloadAsJson['percent'] != null && message.payloadAsJson['charging'] != null) {
+          int battery = (message.payloadAsJson['percent']).round();
+          bool charging = message.payloadAsJson['charging']; 
+          String dateTime = message.payloadAsJson['utc_time'];
+
+          debugPrint("-RECEIVED- Battery: $battery");
+          debugPrint("-RECEIVED- Charging: $charging");
+          debugPrint("-RECEIVED- Date: $dateTime");
+
+          saveStatus(battery, charging, dateTime);
+        }
       }
     });
   }
@@ -52,7 +65,7 @@ void sendMessage(String type) async {
 
       Map<String, String> message = {"request": type};
       queue.publish(message);
-      print("Message: $message");
+      debugPrint("Message: $message");
     }
 }
 
@@ -61,4 +74,11 @@ void saveLocation(double latitude, double longitude, String dateTime) async {
   await prefs.setDouble("latitude", latitude);
   await prefs.setDouble("longitude", longitude);
   await prefs.setString("utc_time", dateTime);
+}
+
+void saveStatus(int battery, bool charging, String dateTime) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setInt("battery", battery);
+  await prefs.setBool("charging", charging);
+  await prefs.setString("status_utc_time", dateTime);
 }

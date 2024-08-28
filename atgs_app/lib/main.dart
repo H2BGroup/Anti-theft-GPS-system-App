@@ -21,7 +21,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData( scaffoldBackgroundColor: backgroundColor),
+      theme: ThemeData( 
+        scaffoldBackgroundColor: backgroundColor,
+        textSelectionTheme: const TextSelectionThemeData(selectionHandleColor: darkestBlue)
+      ),
       home: const AppView(),
     );
   }

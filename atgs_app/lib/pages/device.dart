@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:atgs_app/app.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DevicePage extends StatefulWidget {
   const DevicePage({super.key});
@@ -9,33 +13,73 @@ class DevicePage extends StatefulWidget {
 }
 
 class DevicePageState extends State<DevicePage> {
+  int? batteryPercentage;
+  bool? batteryCharging;
+  bool? signalConnection;
+  DateTime? date;
 
-IconData returnBatteryStatusIcon() {
-  if (batteryStatus == 0) {
-    return Icons.battery_0_bar;
-  } 
-  else if (batteryStatus <= 16) {
-    return Icons.battery_1_bar;
-  } 
-  else if (batteryStatus <= 32) {
-    return Icons.battery_2_bar;
-  } 
-  else if (batteryStatus <= 48) {
-    return Icons.battery_3_bar;
-  } 
-  else if (batteryStatus <= 64) {
-    return Icons.battery_4_bar;
-  } 
-  else if (batteryStatus <= 80) {
-    return Icons.battery_5_bar;
-  } 
-  else if (batteryStatus <= 96) {
-    return Icons.battery_6_bar;
-  } 
-  else {
-    return Icons.battery_full;
+  void updateStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    
+    if(AppViewState.selectedIndex == 1) {
+      await prefs.reload();
+      int? battery = prefs.getInt("battery");
+      bool? charging = prefs.getBool("charging");
+      String? stringDate = prefs.getString("status_utc_time");
+
+      debugPrint("-UPDATE- Battery: $battery");
+      debugPrint("-UPDATE- Charging: $charging");
+      debugPrint("-UPDATE- Date: $stringDate");
+
+      if (battery != null && charging != null && mounted) {
+        setState(() {
+          batteryPercentage = battery;
+          batteryCharging = charging;
+          if(stringDate != null) {
+            DateTime parsedDate = DateFormat("yyyy-MM-dd HH:mm:ss").parse(stringDate, true).toLocal();
+            date = parsedDate;
+
+            DateTime now = DateTime.now();
+            Duration difference = now.difference(parsedDate);
+
+            if (difference.inMinutes > 1) {
+              signalConnection = false;
+            } 
+            else {
+              signalConnection = true;
+            }
+          }
+        });
+      }
+    }
   }
-}
+
+  IconData returnBatteryStatusIcon() {
+    if(batteryPercentage != null){
+      if(batteryCharging != null) {
+        if(batteryCharging!) { return Icons.battery_charging_full; }
+      }
+      if (batteryPercentage == 0) { return Icons.battery_0_bar; } 
+      if (batteryPercentage! <= 16) { return Icons.battery_1_bar; }
+      if (batteryPercentage! <= 32) { return Icons.battery_2_bar; } 
+      if (batteryPercentage! <= 48) { return Icons.battery_3_bar; } 
+      if (batteryPercentage! <= 64) { return Icons.battery_4_bar; } 
+      if (batteryPercentage! <= 80) { return Icons.battery_5_bar; } 
+      if (batteryPercentage! <= 96) { return Icons.battery_6_bar; } 
+      else { return Icons.battery_full; }
+    }
+      else { return Icons.battery_unknown; }
+  }
+
+  late Timer timer;
+  @override
+  void initState() {
+    updateStatus();
+    timer = Timer.periodic(const Duration(seconds: 10), (t) {
+      updateStatus();
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +141,7 @@ IconData returnBatteryStatusIcon() {
                   decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(25),border: Border.all(color: darkestBlue, width: 3)),
                   child: Column(
                     children: [
-                      Text("Battery: $batteryStatus%", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
+                      Text( (batteryPercentage != null) ? "Battery: $batteryPercentage% ${batteryCharging! ? "(Charging)" : ""}" : "Battery: N/A", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
                       Badge(isLabelVisible: false, child: Icon( returnBatteryStatusIcon(), color: darkestBlue, size: 35)),
                     ]
                   )
@@ -110,8 +154,8 @@ IconData returnBatteryStatusIcon() {
                   decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(25),border: Border.all(color: darkestBlue, width: 3)),
                   child: Column(
                     children: [
-                      Text( (signalConnection) ? "Signal: Available" : "Signal: Lost connection", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
-                      Badge(isLabelVisible: false, child: Icon( signalConnection ? Icons.signal_cellular_alt_rounded : Icons.signal_cellular_off_rounded, color: darkestBlue, size: 35)),                  
+                      Text( (signalConnection != null) ? ((signalConnection!) ? "Signal: Connected" : "Signal: Lost connection") : "Signal: N/A", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
+                      Badge(isLabelVisible: false, child: Icon( (signalConnection != null) ? ((signalConnection!) ? Icons.signal_cellular_alt_rounded : Icons.signal_cellular_off_rounded) : Icons.signal_cellular_nodata, color: darkestBlue, size: 35)),                  
                     ]
                   )
                 )   
