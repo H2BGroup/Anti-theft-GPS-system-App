@@ -18,6 +18,10 @@ class ProfilePageState extends State<ProfilePage> {
   static const String dateKey = "selectedDate";
   static const String deviceNumberKey = "deviceNumber";
   static const String ownersNumberKey = "ownersNumber";
+  static const String subscriptionDateTextColorKey = "subscriptionDateTextColorKey";
+  Color subscriptionDateTextColor = Colors.white;
+  Icon subscriptionDateWarningIcon = const Icon(Icons.check_circle_rounded, color: Color.fromARGB(255, 1, 109, 5));
+
 
   void saveDate(String date) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -34,15 +38,33 @@ class ProfilePageState extends State<ProfilePage> {
     await prefs.setString(ownersNumberKey, number);
   }
 
+  void savesubscriptionDateTextColorAndIcon(Color color, Icon icon) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int colorValue = color.value;
+    await prefs.setInt(subscriptionDateTextColorKey, colorValue);
+
+    String iconString = icon.icon!.codePoint.toString();
+    await prefs.setString('subscriptionDateWarningIconName', iconString);
+
+    int iconColor = icon.color!.value;
+    await prefs.setInt("subscriptionDateWarningIconColor", iconColor);
+  }
+
   void loadSavedData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedDate = prefs.getString(dateKey);
     String? savedDeviceNumber = prefs.getString(deviceNumberKey);
     String? savedOwnersNumber = prefs.getString(ownersNumberKey);
 
+    int? colorValue = prefs.getInt(subscriptionDateTextColorKey);
+    String? iconName = prefs.getString('subscriptionDateWarningIconName');
+    int? iconColor = prefs.getInt('subscriptionDateWarningIconColor');
+
     if (savedDate != null) { setState(() {datePickerController.text = savedDate; }); }
     if (savedDeviceNumber != null) { setState(() {deviceNumberController.text = savedDeviceNumber; }); }
     if (savedOwnersNumber != null) { setState(() {ownersNumberController.text = savedOwnersNumber; }); }
+    if (colorValue != null) { setState(() {subscriptionDateTextColor = Color(colorValue); }); }
+    if (iconName != null && iconColor != null) { setState(() {subscriptionDateWarningIcon = Icon(IconData(int.parse(iconName), fontFamily: 'MaterialIcons'), color: Color(iconColor),); }); }
   }
 
   void handleNumberControllers() {
@@ -88,7 +110,22 @@ class ProfilePageState extends State<ProfilePage> {
     );
     if (pickedDate == null) return;
     datePickerController.text = DateFormat('dd MMMM, yyyy').format(pickedDate);
+    DateTime subscriptionDate = DateFormat("dd MMMM, yyyy").parse(datePickerController.text, true);
+
+    if(subscriptionDate.isBefore(DateTime.now())){
+      setState(() {
+        subscriptionDateTextColor = Colors.red; 
+        subscriptionDateWarningIcon = const Icon(Icons.warning, color: Colors.red);
+        });
+    }
+    else {
+      setState(() {
+        subscriptionDateTextColor = Colors.white; 
+        subscriptionDateWarningIcon = const Icon(Icons.check_circle_rounded, color: Color.fromARGB(255, 1, 109, 5));
+        });
+    }
     saveDate(DateFormat('dd MMMM, yyyy').format(pickedDate));
+    savesubscriptionDateTextColorAndIcon(subscriptionDateTextColor, subscriptionDateWarningIcon);
   }
 
 @override
@@ -116,7 +153,7 @@ class ProfilePageState extends State<ProfilePage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text("Profile settings", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 30),
 
                   Container(
                     padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
@@ -131,7 +168,7 @@ class ProfilePageState extends State<ProfilePage> {
                           children: [
                             SizedBox(
                               width: 240,
-                              height: 80,
+                              height: 70,
                               child: 
                               TextField(
                                 controller: deviceNumberController,
@@ -143,6 +180,7 @@ class ProfilePageState extends State<ProfilePage> {
                                   FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))
                                 ],
                                 decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.all(8.0),
                                   enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),
                                   focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),
                                   counterText: ''
@@ -155,7 +193,7 @@ class ProfilePageState extends State<ProfilePage> {
                       ]
                     )
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 35),
 
                   Container(
                     padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
@@ -170,7 +208,7 @@ class ProfilePageState extends State<ProfilePage> {
                           children: [
                             SizedBox(
                               width: 240,
-                              height: 80,
+                              height: 70,
                               child: 
                               TextField(
                                 controller: ownersNumberController,
@@ -182,6 +220,7 @@ class ProfilePageState extends State<ProfilePage> {
                                   FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))
                                 ],
                                 decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.all(8.0),
                                   enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),
                                   focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),
                                   counterText: ''
@@ -194,7 +233,7 @@ class ProfilePageState extends State<ProfilePage> {
                       ]
                     )
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 35),
 
                   Container(
                     padding: const EdgeInsets.all(10.0),
@@ -206,15 +245,17 @@ class ProfilePageState extends State<ProfilePage> {
                         const SizedBox(height: 5),
                         SizedBox(
                           width: 250,
-                          height: 75,
+                          height: 65,
                           child: 
                             TextField(
-                                style: TextStyle(fontWeight: FontWeight.w700, foreground: Paint() ..color = Colors.white, fontSize: 20),
+                                style: TextStyle(fontWeight: FontWeight.w700, foreground: Paint() ..color = subscriptionDateTextColor, fontSize: 20),
                                 cursorColor: darkestBlue,
                                 textAlign: TextAlign.center,
                                 controller: datePickerController,
                                 readOnly: true,
                                 decoration: InputDecoration(
+                                  contentPadding: const EdgeInsets.all(8.0),
+                                  suffixIcon: subscriptionDateWarningIcon,
                                   enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),
                                   focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),                 
                                   hintText: "Click here to select date",
