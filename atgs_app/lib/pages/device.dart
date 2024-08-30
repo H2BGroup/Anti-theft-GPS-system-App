@@ -1,6 +1,7 @@
 import 'dart:async';
-
+import 'dart:math';
 import 'package:atgs_app/app.dart';
+import 'package:atgs_app/message_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,11 +13,13 @@ class DevicePage extends StatefulWidget {
   State<DevicePage> createState() => DevicePageState();
 }
 
-class DevicePageState extends State<DevicePage> {
+class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMixin {
   int? batteryPercentage;
   bool? batteryCharging;
   bool? signalConnection;
   DateTime? date;
+
+  late AnimationController refreshButtonController;
 
   void updateStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -71,6 +74,16 @@ class DevicePageState extends State<DevicePage> {
       else { return Icons.battery_unknown; }
   }
 
+  void refreshDeviceStatus() {
+    if (refreshButtonController.isAnimating) return;
+    
+    sendMessage("status");
+    if(AppViewState.selectedIndex == 1 && mounted){
+      refreshButtonController.repeat(); 
+      Future.delayed(const Duration(seconds: 3), () { refreshButtonController.stop(); });
+    }
+  }
+
   late Timer timer;
   @override
   void initState() {
@@ -78,6 +91,9 @@ class DevicePageState extends State<DevicePage> {
     timer = Timer.periodic(const Duration(seconds: 10), (t) {
       updateStatus();
     });
+    if(AppViewState.selectedIndex == 1 && mounted){
+      refreshButtonController = AnimationController(vsync: this, duration: const Duration(seconds: 1));
+    }
     super.initState();
   }
 
@@ -100,10 +116,10 @@ class DevicePageState extends State<DevicePage> {
               
               children: [
                 Text("Device status", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
-                const SizedBox(height: 45),
+                const SizedBox(height: 30),
 
                 Container(
-                  padding: const EdgeInsets.all(10.0),
+                  padding: const EdgeInsets.all(8.0),
                   width: 330,
                   decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(25),border: Border.all(color: darkestBlue, width: 3)),
                   child: Column(
@@ -133,32 +149,52 @@ class DevicePageState extends State<DevicePage> {
                     ],
                   )
                 ),
-                const SizedBox(height: 45),
+                const SizedBox(height: 30),
 
                 Container(
-                  padding: const EdgeInsets.all(15.0),
+                  padding: const EdgeInsets.all(8.0),
                   width: 330,
                   decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(25),border: Border.all(color: darkestBlue, width: 3)),
                   child: Column(
                     children: [
                       Text( (batteryPercentage != null) ? "Battery: $batteryPercentage% ${batteryCharging! ? "(Charging)" : ""}" : "Battery: N/A", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
-                      Badge(isLabelVisible: false, child: Icon( returnBatteryStatusIcon(), color: darkestBlue, size: 35)),
+                      Badge(isLabelVisible: false, child: Icon( returnBatteryStatusIcon(), color: darkestBlue, size: 45)),
                     ]
                   )
                 ),         
-                const SizedBox(height: 45),
+                const SizedBox(height: 30),
 
                 Container(
-                  padding: const EdgeInsets.all(15.0),
+                  padding: const EdgeInsets.all(8.0),
                   width: 330,
                   decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(25),border: Border.all(color: darkestBlue, width: 3)),
                   child: Column(
                     children: [
                       Text( (signalConnection != null) ? ((signalConnection!) ? "Signal: Connected" : "Signal: Lost connection") : "Signal: N/A", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
-                      Badge(isLabelVisible: false, child: Icon( (signalConnection != null) ? ((signalConnection!) ? Icons.signal_cellular_alt_rounded : Icons.signal_cellular_off_rounded) : Icons.signal_cellular_nodata, color: darkestBlue, size: 35)),                  
+                      Badge(isLabelVisible: false, child: Icon( (signalConnection != null) ? ((signalConnection!) ? Icons.signal_cellular_alt_rounded : Icons.signal_cellular_off_rounded) : Icons.signal_cellular_nodata, color: darkestBlue, size: 45)),                  
                     ]
                   )
-                )   
+                ),
+                const SizedBox(height: 20),
+
+                Container(
+                  padding: const EdgeInsets.all(2.0),
+                  width: 80,
+                  decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(25),border: Border.all(color: darkestBlue, width: 3)),
+                  child: GestureDetector(
+                    onTap: refreshDeviceStatus,
+                    child: AnimatedBuilder(
+                      animation: refreshButtonController,
+                      builder: (context, child) {
+                        return Transform.rotate(
+                          angle: refreshButtonController.value * 2.0 * pi,
+                          child: child,
+                        );
+                      },
+                      child: const Icon(Icons.refresh_rounded, color: darkestBlue,  size: 50)
+                    )
+                  )
+                )
               ]
               )
             )
