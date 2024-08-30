@@ -102,15 +102,20 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   onTapDatePicker({required BuildContext context}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedDate = prefs.getString(dateKey);
+    DateTime? subscriptionDate;
+    if(savedDate != null) {subscriptionDate = DateFormat("dd MMMM, yyyy").parse(savedDate, true);}
     DateTime? pickedDate = await showDatePicker(
+      // ignore: use_build_context_synchronously
       context: context,
       lastDate: DateTime(2030),
       firstDate: DateTime(2024),
-      initialDate: DateTime.now(),
+      initialDate: (subscriptionDate != null) ? subscriptionDate : DateTime.now(),
     );
     if (pickedDate == null) return;
     datePickerController.text = DateFormat('dd MMMM, yyyy').format(pickedDate);
-    DateTime subscriptionDate = DateFormat("dd MMMM, yyyy").parse(datePickerController.text, true);
+    subscriptionDate = DateFormat("dd MMMM, yyyy").parse(datePickerController.text, true);
 
     if(subscriptionDate.isBefore(DateTime.now())){
       setState(() {
@@ -181,6 +186,7 @@ class ProfilePageState extends State<ProfilePage> {
                                 ],
                                 decoration: const InputDecoration(
                                   contentPadding: EdgeInsets.all(8.0),
+                                  prefixIcon: Icon(Icons.phone, color: darkestBlue, size: 38),
                                   enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),
                                   focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),
                                   counterText: ''
@@ -221,6 +227,7 @@ class ProfilePageState extends State<ProfilePage> {
                                 ],
                                 decoration: const InputDecoration(
                                   contentPadding: EdgeInsets.all(8.0),
+                                  prefixIcon: Icon(Icons.phone_android, color: darkestBlue, size: 36),
                                   enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),
                                   focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),
                                   counterText: ''
@@ -255,7 +262,7 @@ class ProfilePageState extends State<ProfilePage> {
                                 readOnly: true,
                                 decoration: InputDecoration(
                                   contentPadding: const EdgeInsets.all(8.0),
-                                  suffixIcon: subscriptionDateWarningIcon,
+                                  suffixIcon: (datePickerController.text != "") ? subscriptionDateWarningIcon : null,
                                   enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),
                                   focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: darkestBlue, width: 2.0)),                 
                                   hintText: "Click here to select date",
@@ -271,7 +278,7 @@ class ProfilePageState extends State<ProfilePage> {
               )
             )
           )
-      )
+        )
       )
     );
   }
