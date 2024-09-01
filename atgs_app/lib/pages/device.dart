@@ -74,14 +74,27 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
       else { return Icons.battery_unknown; }
   }
 
-  void refreshDeviceStatus() {
-    if (refreshButtonController.isAnimating) return;
-    
-    sendMessage("status");
-    if(AppViewState.selectedIndex == 1 && mounted){
-      refreshButtonController.repeat(); 
-      Future.delayed(const Duration(seconds: 3), () { refreshButtonController.stop(); });
-    }
+void refreshDeviceStatus() {
+  if (!mounted || refreshButtonController.isAnimating) return; 
+
+  sendMessage("status");
+  if (AppViewState.selectedIndex == 1 && mounted) {
+    refreshButtonController.repeat();
+    Future.delayed(const Duration(seconds: 3), () {if (mounted) { refreshButtonController.stop(); }});
+  }
+}
+
+@override
+void didChangeDependencies() {
+  super.didChangeDependencies();
+  if (mounted && ModalRoute.of(context)?.isCurrent == false) { refreshButtonController.stop(); }
+}
+
+  @override
+  void dispose() {
+    refreshButtonController.dispose();
+    timer.cancel();
+    super.dispose();
   }
 
   late Timer timer;
@@ -93,6 +106,9 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
     });
     if(AppViewState.selectedIndex == 1 && mounted){
       refreshButtonController = AnimationController(vsync: this, duration: const Duration(seconds: 1));
+    }
+    else {
+    refreshButtonController = AnimationController.unbounded(vsync: this);
     }
     super.initState();
   }
