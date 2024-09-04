@@ -65,6 +65,23 @@ class ProfilePageState extends State<ProfilePage> {
     if (savedOwnersNumber != null) { setState(() {ownersNumberController.text = savedOwnersNumber; }); }
     if (colorValue != null) { setState(() {subscriptionDateTextColor = Color(colorValue); }); }
     if (iconName != null && iconColor != null) { setState(() {subscriptionDateWarningIcon = Icon(IconData(int.parse(iconName), fontFamily: 'MaterialIcons'), color: Color(iconColor),); }); }
+  
+  
+    if (datePickerController.text.isNotEmpty) {
+    if( DateFormat("dd MMMM, yyyy").parse(datePickerController.text, true).isBefore(DateTime.now())){
+      setState(() {
+        subscriptionDateTextColor = Colors.red; 
+        subscriptionDateWarningIcon = const Icon(Icons.warning, color: Colors.red);
+        });
+    }
+    else {
+      setState(() {
+        subscriptionDateTextColor = Colors.white; 
+        subscriptionDateWarningIcon = const Icon(Icons.check_circle_rounded, color: Color.fromARGB(255, 1, 109, 5));
+        });
+    }
+    savesubscriptionDateTextColorAndIcon(subscriptionDateTextColor, subscriptionDateWarningIcon);
+  }
   }
 
   void handleNumberControllers() {

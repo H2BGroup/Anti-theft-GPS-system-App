@@ -20,6 +20,7 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
   DateTime? date;
 
   late AnimationController refreshButtonController;
+  static ValueNotifier<bool> stopRefreshingAnimationNotifier = ValueNotifier<bool>(false);
 
   void updateStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -50,6 +51,7 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
             } 
             else {
               signalConnection = true;
+              stopRefreshingAnimationNotifier.value = true;
             }
           }
         });
@@ -79,8 +81,11 @@ void refreshDeviceStatus() {
 
   sendMessage("status");
   if (AppViewState.selectedIndex == 1 && mounted) {
+    stopRefreshingAnimationNotifier.value = false;
     refreshButtonController.repeat();
-    Future.delayed(const Duration(seconds: 3), () {if (mounted) { refreshButtonController.stop(); }});
+    stopRefreshingAnimationNotifier.addListener(() {
+      if (stopRefreshingAnimationNotifier.value && mounted) { refreshButtonController.stop(); }
+    });
   }
 }
 
@@ -132,7 +137,7 @@ void didChangeDependencies() {
               
               children: [
                 Text("Device status", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
 
                 Container(
                   padding: const EdgeInsets.all(8.0),
@@ -165,7 +170,7 @@ void didChangeDependencies() {
                     ],
                   )
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 25),
 
                 Container(
                   padding: const EdgeInsets.all(8.0),
@@ -175,10 +180,11 @@ void didChangeDependencies() {
                     children: [
                       Text( (batteryPercentage != null) ? "Battery: $batteryPercentage% ${batteryCharging! ? "(Charging)" : ""}" : "Battery: N/A", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
                       Badge(isLabelVisible: false, child: Icon( returnBatteryStatusIcon(), color: darkestBlue, size: 45)),
+                      Text( (signalConnection != null) ? ((signalConnection!) ? "" : "Last update: ${DateFormat('dd.MM.yyyy, HH:mm').format(date!)}") : "", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 16, fontWeight: FontWeight.w500, fontStyle: FontStyle.italic))
                     ]
                   )
                 ),         
-                const SizedBox(height: 30),
+                const SizedBox(height: 25),
 
                 Container(
                   padding: const EdgeInsets.all(8.0),
@@ -191,7 +197,7 @@ void didChangeDependencies() {
                     ]
                   )
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
 
                 Container(
                   padding: const EdgeInsets.all(2.0),
