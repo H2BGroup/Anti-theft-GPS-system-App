@@ -161,7 +161,14 @@ void didChangeDependencies() {
                               inactiveThumbColor: darkBlue,
                               trackOutlineColor: deviceArmed ? WidgetStateProperty.all(darkestBlue) : WidgetStateProperty.all(darkBlue),
                               onChanged: (bool value) {
-                                setState(() { deviceArmed = value;});
+                                setState(() {
+                                  deviceArmed = value;
+                                  if(deviceArmed) {
+                                    sendMessage("armed");
+                                  } else {
+                                    sendMessage("disarmed");
+                                  }
+                                });
                               }
                             )
                           ])
