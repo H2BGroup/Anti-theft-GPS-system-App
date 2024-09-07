@@ -63,7 +63,11 @@ void sendMessage(String type) async {
     if (deviceNumber != null) { 
       Queue queue = await channel.queue(deviceNumber, durable: true);
 
-      Map<String, String> message = {"request": type};
+      Map<String, String> message;
+      if(type == "status" || type == "location") { message = {"request": type}; }
+      
+      else { message = {"armed": type}; }
+      
       queue.publish(message);
       debugPrint("Message: $message");
     }

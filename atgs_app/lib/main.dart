@@ -13,6 +13,7 @@ void startMessageService(_) {
   receiveMessage();
   sendMessage("location");
   sendMessage("status");
+  sendMessage("armed: $deviceArmed");
 }
 
 class MyApp extends StatelessWidget {

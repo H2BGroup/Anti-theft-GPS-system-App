@@ -22,6 +22,18 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
   late AnimationController refreshButtonController;
   static ValueNotifier<bool> stopRefreshingAnimationNotifier = ValueNotifier<bool>(false);
 
+  void saveDeviceArmedStatus(bool armed) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("deviceArmedKey", armed);
+  }
+
+  void loadSavedData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? armed = prefs.getBool("deviceArmedKey");
+
+    if (armed != null) { setState(() {deviceArmed = armed; }); }
+  }
+
   void updateStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     
@@ -106,6 +118,7 @@ void didChangeDependencies() {
   @override
   void initState() {
     updateStatus();
+    loadSavedData();
     timer = Timer.periodic(const Duration(seconds: 10), (t) {
       updateStatus();
     });
@@ -163,11 +176,8 @@ void didChangeDependencies() {
                               onChanged: (bool value) {
                                 setState(() {
                                   deviceArmed = value;
-                                  if(deviceArmed) {
-                                    sendMessage("armed");
-                                  } else {
-                                    sendMessage("disarmed");
-                                  }
+                                  sendMessage("$deviceArmed");
+                                  saveDeviceArmedStatus(deviceArmed);
                                 });
                               }
                             )
