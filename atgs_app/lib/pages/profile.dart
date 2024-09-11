@@ -15,33 +15,30 @@ class ProfilePageState extends State<ProfilePage> {
   TextEditingController deviceNumberController = TextEditingController(text: '+');
   TextEditingController ownersNumberController = TextEditingController(text: '+');
   TextEditingController datePickerController = TextEditingController();
-  static const String dateKey = "selectedDate";
-  static const String deviceNumberKey = "deviceNumber";
-  static const String ownersNumberKey = "ownersNumber";
-  static const String subscriptionDateTextColorKey = "subscriptionDateTextColorKey";
+
   Color subscriptionDateTextColor = Colors.white;
   Icon subscriptionDateWarningIcon = const Icon(Icons.check_circle_rounded, color: Color.fromARGB(255, 1, 109, 5));
 
 
   void saveDate(String date) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(dateKey, date);
+    await prefs.setString("selectedDate", date);
   }
 
   void saveDeviceNumber(String number) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(deviceNumberKey, number);
+    await prefs.setString("deviceNumber", number);
   }
 
   void saveOwnersNumber(String number) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(ownersNumberKey, number);
+    await prefs.setString("ownersNumber", number);
   }
 
   void savesubscriptionDateTextColorAndIcon(Color color, Icon icon) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int colorValue = color.value;
-    await prefs.setInt(subscriptionDateTextColorKey, colorValue);
+    await prefs.setInt("subscriptionDateTextColorKey", colorValue);
 
     String iconString = icon.icon!.codePoint.toString();
     await prefs.setString('subscriptionDateWarningIconName', iconString);
@@ -52,11 +49,11 @@ class ProfilePageState extends State<ProfilePage> {
 
   void loadSavedData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedDate = prefs.getString(dateKey);
-    String? savedDeviceNumber = prefs.getString(deviceNumberKey);
-    String? savedOwnersNumber = prefs.getString(ownersNumberKey);
+    String? savedDate = prefs.getString("selectedDate");
+    String? savedDeviceNumber = prefs.getString("deviceNumber");
+    String? savedOwnersNumber = prefs.getString("ownersNumber");
 
-    int? colorValue = prefs.getInt(subscriptionDateTextColorKey);
+    int? colorValue = prefs.getInt("subscriptionDateTextColorKey");
     String? iconName = prefs.getString('subscriptionDateWarningIconName');
     int? iconColor = prefs.getInt('subscriptionDateWarningIconColor');
 
@@ -120,7 +117,7 @@ class ProfilePageState extends State<ProfilePage> {
 
   onTapDatePicker({required BuildContext context}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedDate = prefs.getString(dateKey);
+    String? savedDate = prefs.getString("selectedDate");
     DateTime? subscriptionDate;
     if(savedDate != null) {subscriptionDate = DateFormat("dd MMMM, yyyy").parse(savedDate, true);}
     DateTime? pickedDate = await showDatePicker(

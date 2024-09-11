@@ -8,6 +8,8 @@ const darkestBlue = Color.fromARGB(255, 9, 113, 160);
 const darkBlue = Color.fromARGB(255, 21, 144, 199);
 const lightBlue =Color.fromARGB(255, 151, 222, 254);
 const lightGrey = Color.fromARGB(255, 231, 230, 230);
+const introductionDark = Color.fromARGB(255, 0, 105, 152);
+const introductionLight = Color.fromARGB(255, 179, 208, 241);
 
 bool deviceArmed = true;
 

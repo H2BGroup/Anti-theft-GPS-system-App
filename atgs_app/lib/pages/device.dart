@@ -196,7 +196,13 @@ void didChangeDependencies() {
                   child: Column(
                     children: [
                       Text( (batteryPercentage != null) ? "Battery: $batteryPercentage% ${batteryCharging! ? "(Charging)" : ""}" : "Battery: N/A", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
-                      Badge(isLabelVisible: false, child: Icon( returnBatteryStatusIcon(), color: darkestBlue, size: 45)),
+                      Badge(
+                        isLabelVisible: false,
+                        child: Icon( returnBatteryStatusIcon(),
+                          color: darkestBlue,
+                          size: 45
+                        )
+                      ),
                       Text( (signalConnection != null) ? ((signalConnection!) ? "" : "Last update: ${DateFormat('dd.MM.yyyy, HH:mm').format(date!)}") : "", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 16, fontWeight: FontWeight.w500, fontStyle: FontStyle.italic))
                     ]
                   )
@@ -210,7 +216,13 @@ void didChangeDependencies() {
                   child: Column(
                     children: [
                       Text( (signalConnection != null) ? ((signalConnection!) ? "Signal: Connected" : "Signal: Lost connection") : "Signal: N/A", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
-                      Badge(isLabelVisible: false, child: Icon( (signalConnection != null) ? ((signalConnection!) ? Icons.signal_cellular_alt_rounded : Icons.signal_cellular_off_rounded) : Icons.signal_cellular_nodata, color: darkestBlue, size: 45)),                  
+                      Badge(
+                        isLabelVisible: false, 
+                        child: Icon( (signalConnection != null) ? ((signalConnection!) ? Icons.signal_cellular_alt_rounded : Icons.signal_cellular_off_rounded) : Icons.signal_cellular_nodata, 
+                          color: (signalConnection != null) ? ((signalConnection!) ? darkBlue : Colors.red) : Colors.orange, 
+                          size: 45
+                        )
+                      )                  
                     ]
                   )
                 ),

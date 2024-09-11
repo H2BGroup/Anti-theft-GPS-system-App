@@ -41,6 +41,7 @@ dependencies:
   shared_preferences: ^2.3.1
   dart_amqp: ^0.3.1
   flutter_isolate: ^2.0.4
+  introduction_screen: ^3.1.14
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +59,10 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+   - assets/introduction_background.png
+   - assets/arrow-narrow-right.png
+   - assets/arrow-narrow-left.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

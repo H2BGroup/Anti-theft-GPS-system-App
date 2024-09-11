@@ -1,4 +1,3 @@
-import "package:atgs_app/pages/profile.dart";
 import "package:dart_amqp/dart_amqp.dart";
 import "package:flutter/material.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -14,7 +13,7 @@ void receiveMessage() async {
   Channel channel = await client.channel();
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? ownersNumber = prefs.getString(ProfilePageState.ownersNumberKey);
+  String? ownersNumber = prefs.getString("ownersNumber");
 
   if (ownersNumber != null) {
     Queue queue = await channel.queue(ownersNumber, durable: true);
@@ -58,7 +57,7 @@ void sendMessage(String type) async {
   Channel channel = await client.channel();
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? deviceNumber = prefs.getString(ProfilePageState.deviceNumberKey);
+    String? deviceNumber = prefs.getString("deviceNumber");
 
     if (deviceNumber != null) { 
       Queue queue = await channel.queue(deviceNumber, durable: true);
