@@ -27,24 +27,23 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  bool isFirstRun = true;
+  bool isInitialized = false;
 
-    @override
+  @override
   void initState() {
     super.initState();
-    checkFirstRun();
+    checkifInitialized();
   }
 
-  Future<void> checkFirstRun() async {
+  Future<void> checkifInitialized() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool? savedIsFirstRun = prefs.getBool("isFirstRun");
+    bool? savedisInitialized = prefs.getBool("isInitialized");
 
-    if(savedIsFirstRun != null) {
+    if(savedisInitialized != null) {
       setState(() {
-        isFirstRun = savedIsFirstRun;
+        isInitialized = savedisInitialized;
       });
     }
-    prefs.setBool("isFirstRun", false);
   }
 
   @override
@@ -55,7 +54,7 @@ class MyAppState extends State<MyApp> {
         scaffoldBackgroundColor: backgroundColor,
         textSelectionTheme: const TextSelectionThemeData(selectionHandleColor: darkestBlue)
       ),
-      home: (isFirstRun) ? const IntroductionView() : const AppView()
+      home: (isInitialized) ? const AppView() : const IntroductionView()
     );
   }
 }
@@ -74,6 +73,11 @@ class IntroductionViewState extends State<IntroductionView> {
   final introKey = GlobalKey<IntroductionScreenState>();
   int currentPageIndex = 0;
   bool nextButtonAllowed = false;
+
+  void saveInitializedStatus(bool isInitialized) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("isInitialized", isInitialized);
+  }
 
   void saveDeviceNumber(String number) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -303,6 +307,7 @@ class IntroductionViewState extends State<IntroductionView> {
         ),
         onDone: () {
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AppView()));
+          saveInitializedStatus(true);
         },
         onChange: (index) {
           setState(() { currentPageIndex = index; });
