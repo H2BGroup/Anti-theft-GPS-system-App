@@ -28,11 +28,17 @@ class ProfilePageState extends State<ProfilePage> {
   void saveDeviceNumber(String number) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString("deviceNumber", number);
+
+    if(number == "+") { await prefs.setBool("isInitialized", false); }
+    else { await prefs.setBool("isInitialized", true);  }
   }
 
   void saveOwnersNumber(String number) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString("ownersNumber", number);
+
+    if(number == "+") { await prefs.setBool("isInitialized", false); }
+    else { await prefs.setBool("isInitialized", true); }
   }
 
   void savesubscriptionDateTextColorAndIcon(Color color, Icon icon) async {
