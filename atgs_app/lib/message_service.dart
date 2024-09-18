@@ -52,7 +52,7 @@ void receiveMessage() async {
   }
 }
 
-void sendMessage(String type) async {
+void sendMessage(dynamic type) async {
   Client client = Client(settings: settings);
   Channel channel = await client.channel();
 
@@ -62,7 +62,7 @@ void sendMessage(String type) async {
     if (deviceNumber != null) { 
       Queue queue = await channel.queue(deviceNumber, durable: true);
 
-      Map<String, String> message;
+      Map<String, dynamic> message;
       if(type == "status" || type == "location") { message = {"request": type}; }
       
       else { message = {"armed": type}; }

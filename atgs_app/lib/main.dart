@@ -16,7 +16,7 @@ void startMessageService(_) {
   receiveMessage();
   sendMessage("location");
   sendMessage("status");
-  sendMessage("armed: $deviceArmed");
+  sendMessage(deviceArmed);
 }
 
 class MyApp extends StatefulWidget {
