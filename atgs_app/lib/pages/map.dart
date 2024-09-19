@@ -36,6 +36,39 @@ class MapPageState extends State<MapPage> {
     mapController.rotate(mapRotation);
   }
 
+  Future<void> loadLocationHistory() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    List<String>? storedLocationHistory = prefs.getStringList("locationHistory");
+    List<String>? storedAddressHistory = prefs.getStringList("addressHistory");
+
+    if (storedLocationHistory != null) {
+      setState(() {
+        locationHistory = storedLocationHistory.map((loc) {
+          var coords = loc.split(",");
+          return LatLng(double.parse(coords[0]), double.parse(coords[1]));
+        }).toList();
+      });
+    }
+
+    if (storedAddressHistory != null) {
+      setState(() {
+        addressHistory = storedAddressHistory;
+      });
+    }
+  }
+
+  Future<void> saveLocationHistory() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    List<String> storedLocationHistory = locationHistory.map((latLng) {
+      return '${latLng.latitude},${latLng.longitude}';
+    }).toList();
+
+    await prefs.setStringList("locationHistory", storedLocationHistory);
+    await prefs.setStringList("addressHistory", addressHistory);
+  }
+
   void updateLocation() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -50,8 +83,8 @@ class MapPageState extends State<MapPage> {
       debugPrint("-UPDATE- Date: $stringDate");
 
       if (latitude != null && longitude != null && mounted) {
-        Address address =
-            await geoCode.reverseGeocoding(latitude: latitude, longitude: longitude);
+        Address address = await geoCode.reverseGeocoding(
+            latitude: latitude, longitude: longitude);
 
         setState(() {
           if (showActualPosition) mapLatLng = LatLng(latitude, longitude);
@@ -67,6 +100,7 @@ class MapPageState extends State<MapPage> {
               addressHistory.add(
                   "${address.streetAddress ?? ''} ${address.streetNumber ?? ''}, ${address.postal != null ? '${address.postal!.substring(0, 2)}-${address.postal!.substring(2, 5)}' : ''} ${address.city} - ${DateFormat("dd-MM-yyyy HH:mm").format(parsedDate)}");
               locationHistory.add(LatLng(latitude, longitude));
+              saveLocationHistory();
             }
           }
         });
@@ -80,6 +114,7 @@ class MapPageState extends State<MapPage> {
   late Timer timer;
   @override
   void initState() {
+    loadLocationHistory();
     updateLocation();
     timer = Timer.periodic(const Duration(seconds: 5), (t) {
       updateLocation();
