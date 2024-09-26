@@ -39,6 +39,10 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
       bool? charging = prefs.getBool("charging");
       String? stringDate = prefs.getString("status_utc_time");
 
+      debugPrint("-UPDATE- Battery: $battery");
+      debugPrint("-UPDATE- Charging: $charging");
+      debugPrint("-UPDATE- Date: $stringDate");
+
       if (battery != null && charging != null && mounted) {
         setState(() {
           batteryPercentage = battery;

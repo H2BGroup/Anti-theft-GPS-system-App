@@ -134,7 +134,7 @@ class MapPageState extends State<MapPage> {
       body: SlidingUpPanel(
         minHeight: 65,
         maxHeight:
-            MediaQuery.of(context).size.height * 0.30, // 30% of the screen
+            MediaQuery.of(context).size.height * 0.30,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         panel: _buildLocationHistoryPanel(),
         body: Stack(children: [

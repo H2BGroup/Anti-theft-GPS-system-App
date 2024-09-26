@@ -64,10 +64,6 @@ class AppViewState extends State<AppView> {
     bool? charging = prefs.getBool("charging");
     String? stringDate = prefs.getString("status_utc_time");
 
-    debugPrint("-UPDATE- Battery: $battery");
-    debugPrint("-UPDATE- Charging: $charging");
-    debugPrint("-UPDATE- Date: $stringDate");
-
     if (battery != null && charging != null) {
       batteryPercentage = battery;
       batteryCharging = charging;
