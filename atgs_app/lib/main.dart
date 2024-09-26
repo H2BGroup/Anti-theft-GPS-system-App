@@ -1,22 +1,11 @@
 import 'package:flutter/services.dart';
-import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:flutter/material.dart';
 import 'package:atgs_app/app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'message_service.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  FlutterIsolate.spawn(startMessageService, null);
   runApp(const MyApp());
-}
-
-void startMessageService(_) {
-  receiveMessage();
-  sendMessage("location");
-  sendMessage("status");
-  sendMessage(deviceArmed);
 }
 
 class MyApp extends StatefulWidget {

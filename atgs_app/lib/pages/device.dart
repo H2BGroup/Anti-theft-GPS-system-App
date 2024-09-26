@@ -5,7 +5,6 @@ import 'package:atgs_app/message_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class DevicePage extends StatefulWidget {
   const DevicePage({super.key});
@@ -15,17 +14,9 @@ class DevicePage extends StatefulWidget {
 }
 
 class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMixin {
-  int? batteryPercentage;
-  bool? batteryCharging;
-  bool? signalConnection;
-  DateTime? date;
 
   late AnimationController refreshButtonController;
   static ValueNotifier<bool> stopRefreshingAnimationNotifier = ValueNotifier<bool>(false);
-
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  bool lowBatteryNotificationSent = false;
-  bool lostSignalNotificationSent = false;
 
   void saveDeviceArmedStatus(bool armed) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -39,39 +30,6 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
     if (armed != null) { setState(() {deviceArmed = armed; }); }
   }
 
-  void initNotifications() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-    );
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
-
-  Future<void> showLowBatteryNotification() async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics = 
-      AndroidNotificationDetails(
-        'low_battery_channel', 'Low Battery',
-        importance: Importance.max, priority: Priority.high, ticker: 'ticker');
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
-  
-    await flutterLocalNotificationsPlugin.show(
-      0, 'Low Battery', 'Your device battery is below 20%', platformChannelSpecifics);
-  }
-
-  Future<void> showLostSignalNotification() async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-      AndroidNotificationDetails(
-        'lost_signal_channel', 'Lost Signal',
-        importance: Importance.max, priority: Priority.high, ticker: 'ticker');
-  
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
-  
-    await flutterLocalNotificationsPlugin.show(
-      0, 'Lost Signal', 'Lost connection to your device', platformChannelSpecifics);
-  }
-
   void updateStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     
@@ -81,39 +39,24 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
       bool? charging = prefs.getBool("charging");
       String? stringDate = prefs.getString("status_utc_time");
 
-      debugPrint("-UPDATE- Battery: $battery");
-      debugPrint("-UPDATE- Charging: $charging");
-      debugPrint("-UPDATE- Date: $stringDate");
-
       if (battery != null && charging != null && mounted) {
         setState(() {
           batteryPercentage = battery;
           batteryCharging = charging;
           if(stringDate != null) {
-            DateTime parsedDate = DateFormat("yyyy-MM-dd HH:mm:ss").parse(stringDate, true).toLocal();
-            date = parsedDate;
+            statusUpdateDate = DateFormat("yyyy-MM-dd HH:mm:ss").parse(stringDate, true).toLocal();
 
             DateTime now = DateTime.now();
-            Duration difference = now.difference(parsedDate);
+            Duration difference = now.difference(statusUpdateDate!);
 
             if (difference.inMinutes > 1) {
               signalConnection = false;
-              if(lostSignalNotificationSent == false) {
-                showLostSignalNotification();
-                lostSignalNotificationSent = true;
-              }
             } 
             else {
               signalConnection = true;
               stopRefreshingAnimationNotifier.value = true;
-              lostSignalNotificationSent = false;
             }
           }
-          if(batteryPercentage! < 20 && batteryCharging == false && lowBatteryNotificationSent == false){
-            showLowBatteryNotification();
-            lowBatteryNotificationSent = true;
-          }
-          else if(batteryPercentage! >= 50) { lowBatteryNotificationSent = false;}
         });
       }
     }
@@ -176,7 +119,6 @@ void didChangeDependencies() {
     else {
     refreshButtonController = AnimationController.unbounded(vsync: this);
     }
-    initNotifications();
     super.initState();
   }
 
@@ -252,7 +194,7 @@ void didChangeDependencies() {
                           size: 45
                         )
                       ),
-                      Text( (signalConnection != null) ? ((signalConnection!) ? "" : "Last update: ${DateFormat('dd.MM.yyyy, HH:mm').format(date!)}") : "", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 16, fontWeight: FontWeight.w500, fontStyle: FontStyle.italic))
+                      Text( (signalConnection != null) ? ((signalConnection!) ? "" : "Last update: ${DateFormat('dd.MM.yyyy, HH:mm').format(statusUpdateDate!)}") : "", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 16, fontWeight: FontWeight.w500, fontStyle: FontStyle.italic))
                     ]
                   )
                 ),         
