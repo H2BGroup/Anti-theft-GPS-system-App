@@ -222,7 +222,7 @@ class MapPageState extends State<MapPage> {
             children: [
               const Text(
                 'Location History',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: backgroundColor),
               ),
               ElevatedButton(
                   onPressed: () {
@@ -235,7 +235,7 @@ class MapPageState extends State<MapPage> {
                       backgroundColor: backgroundColor),
                   child: const Text(
                     "Show on map",
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16),
                   ))
             ],
           ),

@@ -44,6 +44,7 @@ dependencies:
   introduction_screen: ^3.1.14
   sliding_up_panel: ^2.0.0+1
   geocode: ^1.0.3
+  flutter_local_notifications: ^17.2.3
 
 dev_dependencies:
   flutter_test:

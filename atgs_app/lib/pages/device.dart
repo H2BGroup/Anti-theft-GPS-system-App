@@ -5,6 +5,7 @@ import 'package:atgs_app/message_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class DevicePage extends StatefulWidget {
   const DevicePage({super.key});
@@ -22,6 +23,9 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
   late AnimationController refreshButtonController;
   static ValueNotifier<bool> stopRefreshingAnimationNotifier = ValueNotifier<bool>(false);
 
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  bool lowBatteryNotificationSent = false;
+
   void saveDeviceArmedStatus(bool armed) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool("deviceArmedKey", armed);
@@ -32,6 +36,28 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
     bool? armed = prefs.getBool("deviceArmedKey");
 
     if (armed != null) { setState(() {deviceArmed = armed; }); }
+  }
+
+  void initNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future<void> showLowBatteryNotification() async {
+  const AndroidNotificationDetails androidPlatformChannelSpecifics =
+      AndroidNotificationDetails(
+          'low_battery_channel', 'Low Battery',
+          importance: Importance.max, priority: Priority.high, ticker: 'ticker');
+  
+  const NotificationDetails platformChannelSpecifics =
+      NotificationDetails(android: androidPlatformChannelSpecifics);
+  
+  await flutterLocalNotificationsPlugin.show(
+      0, 'Low Battery', 'Your device battery is below 20%', platformChannelSpecifics);
   }
 
   void updateStatus() async {
@@ -66,6 +92,11 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
               stopRefreshingAnimationNotifier.value = true;
             }
           }
+          if(batteryPercentage! < 20 && batteryCharging == false && lowBatteryNotificationSent == false){
+            showLowBatteryNotification();
+            lowBatteryNotificationSent = true;
+          }
+          else if(batteryPercentage! >= 50) { lowBatteryNotificationSent = false;}
         });
       }
     }
@@ -128,6 +159,7 @@ void didChangeDependencies() {
     else {
     refreshButtonController = AnimationController.unbounded(vsync: this);
     }
+    initNotifications();
     super.initState();
   }
 
