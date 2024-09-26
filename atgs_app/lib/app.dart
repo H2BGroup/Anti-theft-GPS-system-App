@@ -35,9 +35,10 @@ class AppViewState extends State<AppView> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const Badge(
-            isLabelVisible: false,
-            child: Icon(Icons.directions_bike, size: 60)),
+        flexibleSpace: Container(
+          alignment: Alignment.centerLeft,
+          child: Image.asset('assets/logo.png', fit: BoxFit.contain)
+        )
       ),
       extendBodyBehindAppBar: true,
       body: Stack(children: [

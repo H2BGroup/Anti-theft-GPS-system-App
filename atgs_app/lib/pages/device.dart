@@ -25,6 +25,7 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   bool lowBatteryNotificationSent = false;
+  bool lostSignalNotificationSent = false;
 
   void saveDeviceArmedStatus(bool armed) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -48,16 +49,27 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
   }
 
   Future<void> showLowBatteryNotification() async {
-  const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    const AndroidNotificationDetails androidPlatformChannelSpecifics = 
       AndroidNotificationDetails(
-          'low_battery_channel', 'Low Battery',
-          importance: Importance.max, priority: Priority.high, ticker: 'ticker');
+        'low_battery_channel', 'Low Battery',
+        importance: Importance.max, priority: Priority.high, ticker: 'ticker');
+
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
   
-  const NotificationDetails platformChannelSpecifics =
-      NotificationDetails(android: androidPlatformChannelSpecifics);
-  
-  await flutterLocalNotificationsPlugin.show(
+    await flutterLocalNotificationsPlugin.show(
       0, 'Low Battery', 'Your device battery is below 20%', platformChannelSpecifics);
+  }
+
+  Future<void> showLostSignalNotification() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+      AndroidNotificationDetails(
+        'lost_signal_channel', 'Lost Signal',
+        importance: Importance.max, priority: Priority.high, ticker: 'ticker');
+  
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+  
+    await flutterLocalNotificationsPlugin.show(
+      0, 'Lost Signal', 'Lost connection to your device', platformChannelSpecifics);
   }
 
   void updateStatus() async {
@@ -86,10 +98,15 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
 
             if (difference.inMinutes > 1) {
               signalConnection = false;
+              if(lostSignalNotificationSent == false) {
+                showLostSignalNotification();
+                lostSignalNotificationSent = true;
+              }
             } 
             else {
               signalConnection = true;
               stopRefreshingAnimationNotifier.value = true;
+              lostSignalNotificationSent = false;
             }
           }
           if(batteryPercentage! < 20 && batteryCharging == false && lowBatteryNotificationSent == false){
