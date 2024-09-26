@@ -214,7 +214,7 @@ void didChangeDependencies() {
                       Badge(
                         isLabelVisible: false, 
                         child: Icon( (signalConnection != null) ? ((signalConnection!) ? Icons.signal_cellular_alt_rounded : Icons.signal_cellular_off_rounded) : Icons.signal_cellular_nodata, 
-                          color: (signalConnection != null) ? ((signalConnection!) ? darkBlue : Colors.red) : Colors.orange, 
+                          color: (signalConnection != null) ? ((signalConnection!) ? darkestBlue : Colors.red) : Colors.orange, 
                           size: 45
                         )
                       )                  
