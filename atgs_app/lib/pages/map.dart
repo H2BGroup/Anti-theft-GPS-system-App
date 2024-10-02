@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
@@ -290,7 +291,7 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
       timestampBoxOpacity = 1.0;
     });
 
-    Timer(const Duration(seconds: 1), () {
+    Timer(const Duration(seconds: 2), () {
       if (AppViewState.selectedIndex == 0) {
         setState(() {
           timestampBoxOpacity = 0.0;
@@ -304,11 +305,21 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
         });
       }
     });
+
+    Clipboard.setData(ClipboardData(text: "${widget.location.latitude}, ${widget.location.longitude}"));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Coordinates copied to clipboard", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, fontStyle: FontStyle.italic)), 
+        duration: Duration(seconds: 1),
+        backgroundColor: backgroundColor
+      )
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       onTap: onTapMarker,
       child: Stack(
         alignment: Alignment.center,
@@ -341,7 +352,7 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
                   duration: const Duration(seconds: 1),
                   opacity: timestampBoxOpacity,
                   child: Container(
-                    padding: const EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(4.0),
                     decoration: BoxDecoration(
                       color: backgroundColor,
                       borderRadius: BorderRadius.circular(10.0),
@@ -369,7 +380,8 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
                       ],
                     ),
                   ),
-                ))
+                )
+              )
         ],
       ),
     );
