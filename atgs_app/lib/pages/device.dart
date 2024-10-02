@@ -171,7 +171,7 @@ void didChangeDependencies() {
                               onChanged: (bool value) {
                                 setState(() {
                                   deviceArmed = value;
-                                  sendMessage("$deviceArmed");
+                                  sendMessage(deviceArmed);
                                   saveDeviceArmedStatus(deviceArmed);
                                 });
                               }
