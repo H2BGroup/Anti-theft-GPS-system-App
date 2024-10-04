@@ -95,12 +95,19 @@ class MapPageState extends State<MapPage> {
                 .parse(stringDate, true)
                 .toLocal();
 
-            if (parsedDate != timeStamp) {
+            
+            if(timeStamp == null || parsedDate.difference(timeStamp!).inMinutes >= 1) {
               timeStamp = parsedDate;
-
+              
               addressHistory.add(
                   "${address.streetAddress ?? ''} ${address.streetNumber ?? ''}, ${address.postal != null ? '${address.postal!.substring(0, 2)}-${address.postal!.substring(2, 5)}' : ''} ${address.city} - ${DateFormat("dd-MM-yyyy HH:mm").format(parsedDate)}");
               locationHistory.add(LatLng(latitude, longitude));
+              
+              if(address.streetAddress != null) {
+                if(address.streetAddress!.startsWith("Throttled!")){
+                  addressHistory.removeLast();
+                }
+              }
               saveLocationHistory();
             }
           }
@@ -240,7 +247,9 @@ class MapPageState extends State<MapPage> {
                   ))
             ],
           ),
-          const Divider(),
+          const Divider(
+            color: backgroundColor,
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: addressHistory.length,
@@ -249,7 +258,7 @@ class MapPageState extends State<MapPage> {
                   leading:
                       const Icon(Icons.location_on, color: backgroundColor),
                   title: Text(addressHistory[index],
-                      style: const TextStyle(fontSize: 16)),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   onTap: () {
                     setState(() {
                       showActualPosition = false;
@@ -327,16 +336,19 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
         children: [
           Center(
             child: Stack(alignment: Alignment.center, children: [
-              const Icon(Icons.place, color: backgroundColor, size: 60),
+              const Positioned(
+                top: -5,
+                child: Icon(Icons.place, color: backgroundColor, size: 60)
+              ),
               Positioned(
-                  top: 10,
+                  top: 5,
                   child: Container(
                       width: 30,
                       height: 30,
                       decoration: const BoxDecoration(
                           shape: BoxShape.circle, color: backgroundColor))),
               const Positioned(
-                top: 7,
+                top: 2,
                 child: Icon(
                   Icons.pedal_bike,
                   color: Colors.white,

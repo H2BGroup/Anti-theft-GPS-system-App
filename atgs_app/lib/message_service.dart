@@ -23,8 +23,8 @@ void receiveMessage() async {
 
       if (message.payloadAsJson['type'] == 'location') {
         if (message.payloadAsJson['latitude'] != null && message.payloadAsJson['longitude'] != null && message.payloadAsJson['utc_time'] != null) {
-          double latitude = double.parse(message.payloadAsJson['latitude']);
-          double longitude = double.parse(message.payloadAsJson['longitude']);
+          double latitude = message.payloadAsJson['latitude'];
+          double longitude = message.payloadAsJson['longitude'];
           String dateTime = message.payloadAsJson['utc_time'];
 
           debugPrint("-RECEIVED- Latitude: $latitude");
