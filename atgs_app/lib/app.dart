@@ -38,7 +38,6 @@ void startMessageService(_) {
   receiveMessage();
   sendMessage("location");
   sendMessage("status");
-  sendMessage(deviceArmed);
 }
 
 class AppView extends StatefulWidget {

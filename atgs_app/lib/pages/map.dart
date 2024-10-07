@@ -112,9 +112,9 @@ class MapPageState extends State<MapPage> {
             }
           }
         });
-      }
-      if (showActualPosition) {
-        mapController.move(mapLatLng, mapZoom);
+        if (showActualPosition) {
+          mapController.move(mapLatLng, mapZoom);
+        }
       }
     }
   }
