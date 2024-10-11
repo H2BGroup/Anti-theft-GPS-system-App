@@ -96,18 +96,20 @@ class MapPageState extends State<MapPage> {
                 .toLocal();
 
             
-            if(timeStamp == null || parsedDate.difference(timeStamp!).inMinutes >= 1) {
+            if(timeStamp == null || parsedDate.difference(timeStamp!).inMinutes >= 5) {
               timeStamp = parsedDate;
               
-              addressHistory.add(
-                  "${address.streetAddress ?? ''} ${address.streetNumber ?? ''}, ${address.postal != null ? '${address.postal!.substring(0, 2)}-${address.postal!.substring(2, 5)}' : ''} ${address.city} - ${DateFormat("dd-MM-yyyy HH:mm").format(parsedDate)}");
-              locationHistory.add(LatLng(latitude, longitude));
-              
               if(address.streetAddress != null) {
-                if(address.streetAddress!.startsWith("Throttled!")){
-                  addressHistory.removeLast();
+                if(address.streetAddress!.startsWith("Throttled!")) {
+                  addressHistory.add(LatLng(latitude, longitude).toString());
+                }
+                else {
+                  addressHistory.add(
+                      "${address.streetAddress ?? ''} ${address.streetNumber ?? ''}, ${address.postal != null ? '${address.postal!.substring(0, 2)}-${address.postal!.substring(2, 5)}' : ''} ${address.city} - ${DateFormat("dd-MM-yyyy HH:mm").format(parsedDate)}");
                 }
               }
+              locationHistory.add(LatLng(latitude, longitude));
+              
               saveLocationHistory();
             }
           }
