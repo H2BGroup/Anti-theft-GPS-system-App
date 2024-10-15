@@ -79,14 +79,15 @@ class MapPageState extends State<MapPage> {
       double? longitude = prefs.getDouble("longitude");
       String? stringDate = prefs.getString("utc_time");
 
-      debugPrint("-UPDATE- Latitude: $latitude");
-      debugPrint("-UPDATE- Longitude: $longitude");
-      debugPrint("-UPDATE- Date: $stringDate");
+      // debugPrint("-UPDATE- Latitude: $latitude");
+      // debugPrint("-UPDATE- Longitude: $longitude");
+      // debugPrint("-UPDATE- Date: $stringDate");
 
       if (latitude != null && longitude != null && mounted) {
         Address address = await geoCode.reverseGeocoding(
             latitude: latitude, longitude: longitude);
 
+        if(mounted) {
         setState(() {
           if (showActualPosition) mapLatLng = LatLng(latitude, longitude);
 
@@ -114,7 +115,8 @@ class MapPageState extends State<MapPage> {
             }
           }
         });
-        if (showActualPosition) {
+        }
+        if (showActualPosition && mounted) {
           mapController.move(mapLatLng, mapZoom);
         }
       }

@@ -56,14 +56,21 @@ class AppViewState extends State<AppView> {
   bool expiringSubscriptionNotificationSent = false;
 
   Future<void> handleNotifications() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    
+    debugPrint("Movement detected value: $movementDetected");
+    if(movementDetected) { // movement detected notification
+      showMovementDectectedNotification(flutterLocalNotificationsPlugin);
+      movementDetected = false;
+    }
+
+    SharedPreferences prefs = await SharedPreferences.getInstance(); // lost signal and low battery notifications
   
     await prefs.reload();
     int? battery = prefs.getInt("battery");
     bool? charging = prefs.getBool("charging");
     String? stringDate = prefs.getString("status_utc_time");
 
-    if (battery != null && charging != null) {
+    if (battery != null && charging != null) { 
       batteryPercentage = battery;
       batteryCharging = charging;
       if (stringDate != null) {
@@ -87,7 +94,7 @@ class AppViewState extends State<AppView> {
       else if (batteryPercentage! >= 50) { lowBatteryNotificationSent = false; }
     }
 
-    String? savedSubscriptionDate = prefs.getString("selectedDate");
+    String? savedSubscriptionDate = prefs.getString("selectedDate"); // expiring subscription notification
     if(savedSubscriptionDate != null) {
       DateTime subscriptionDate = DateFormat("dd MMMM, yyyy").parse(savedSubscriptionDate, true);
       
@@ -103,11 +110,6 @@ class AppViewState extends State<AppView> {
           expiringSubscriptionNotificationSent = true;
         }
         else if (!subscriptionDateIsTomorrow) { expiringSubscriptionNotificationSent = false; }
-    }
-
-    if(movementDetected) {
-      showMovementDectectedNotification(flutterLocalNotificationsPlugin);
-      movementDetected = false;
     }
   }
 

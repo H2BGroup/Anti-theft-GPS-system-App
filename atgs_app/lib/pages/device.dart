@@ -32,16 +32,16 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
 
   void updateStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    
+
     if(AppViewState.selectedIndex == 1) {
       await prefs.reload();
       int? battery = prefs.getInt("battery");
       bool? charging = prefs.getBool("charging");
       String? stringDate = prefs.getString("status_utc_time");
 
-      debugPrint("-UPDATE- Battery: $battery");
-      debugPrint("-UPDATE- Charging: $charging");
-      debugPrint("-UPDATE- Date: $stringDate");
+      // debugPrint("-UPDATE- Battery: $battery");
+      // debugPrint("-UPDATE- Charging: $charging");
+      // debugPrint("-UPDATE- Date: $stringDate");
 
       if (battery != null && charging != null && mounted) {
         setState(() {
