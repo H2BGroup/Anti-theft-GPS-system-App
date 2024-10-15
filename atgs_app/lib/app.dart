@@ -1,7 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:atgs_app/pages/map.dart';
 import 'package:atgs_app/pages/profile.dart';
 import 'package:atgs_app/pages/device.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart';
+import 'message_service.dart';
+import 'package:flutter_isolate/flutter_isolate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atgs_app/notifications.dart';
 
 const backgroundColor = Color.fromARGB(255, 29, 174, 239);
 const darkestBlue = Color.fromARGB(255, 9, 113, 160);
@@ -12,12 +20,25 @@ const introductionDark = Color.fromARGB(255, 0, 105, 152);
 const introductionLight = Color.fromARGB(255, 179, 208, 241);
 
 bool deviceArmed = true;
+bool movementDetected = false;
+
+int? batteryPercentage;
+bool? batteryCharging;
+bool? signalConnection;
+DateTime? statusUpdateDate;
 
 List<Widget> widgetOptions = const <Widget>[
   MapPage(),
   DevicePage(),
   ProfilePage(),
 ];
+
+
+void startMessageService(_) {
+  receiveMessage();
+  sendMessage("location");
+  sendMessage("status");
+}
 
 class AppView extends StatefulWidget {
   const AppView({super.key});
@@ -28,6 +49,82 @@ class AppView extends StatefulWidget {
 
 class AppViewState extends State<AppView> {
   static int selectedIndex = 0;
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  bool lowBatteryNotificationSent = false;
+  bool lostSignalNotificationSent = false;
+  bool expiringSubscriptionNotificationSent = false;
+
+  Future<void> handleNotifications() async {
+    
+    debugPrint("Movement detected value: $movementDetected");
+    if(movementDetected) { // movement detected notification
+      showMovementDectectedNotification(flutterLocalNotificationsPlugin);
+      movementDetected = false;
+    }
+
+    SharedPreferences prefs = await SharedPreferences.getInstance(); // lost signal and low battery notifications
+  
+    await prefs.reload();
+    int? battery = prefs.getInt("battery");
+    bool? charging = prefs.getBool("charging");
+    String? stringDate = prefs.getString("status_utc_time");
+
+    if (battery != null && charging != null) { 
+      batteryPercentage = battery;
+      batteryCharging = charging;
+      if (stringDate != null) {
+        statusUpdateDate = DateFormat("yyyy-MM-dd HH:mm:ss").parse(stringDate, true).toLocal();
+
+        Duration difference = DateTime.now().difference(statusUpdateDate!);
+
+        if (difference.inMinutes > 1) {
+          if(!lostSignalNotificationSent) {
+            showLostSignalNotification(flutterLocalNotificationsPlugin);
+            lostSignalNotificationSent = true;
+          }
+        } 
+        else { lostSignalNotificationSent = false; }
+      }
+
+      if (batteryPercentage! < 20 && batteryCharging == false && !lowBatteryNotificationSent) {
+        showLowBatteryNotification(flutterLocalNotificationsPlugin);
+        lowBatteryNotificationSent = true;
+      }
+      else if (batteryPercentage! >= 50) { lowBatteryNotificationSent = false; }
+    }
+
+    String? savedSubscriptionDate = prefs.getString("selectedDate"); // expiring subscription notification
+    if(savedSubscriptionDate != null) {
+      DateTime subscriptionDate = DateFormat("dd MMMM, yyyy").parse(savedSubscriptionDate, true);
+      
+        DateTime now = DateTime.now();
+        DateTime tomorrow = DateTime(now.year, now.month, now.day + 1);
+
+        bool subscriptionDateIsTomorrow = subscriptionDate.year == tomorrow.year && 
+                          subscriptionDate.month == tomorrow.month &&
+                          subscriptionDate.day == tomorrow.day;
+        
+        if(subscriptionDateIsTomorrow && !expiringSubscriptionNotificationSent) {
+          showExpiringSubscriptionNotification(flutterLocalNotificationsPlugin);
+          expiringSubscriptionNotificationSent = true;
+        }
+        else if (!subscriptionDateIsTomorrow) { expiringSubscriptionNotificationSent = false; }
+    }
+  }
+
+  late Timer timer;
+  @override
+  void initState() {
+    WidgetsFlutterBinding.ensureInitialized();
+    FlutterIsolate.spawn(startMessageService, null);
+    initNotifications(flutterLocalNotificationsPlugin);
+
+    timer = Timer.periodic(const Duration(seconds: 20), (t) {
+      handleNotifications();
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +132,10 @@ class AppViewState extends State<AppView> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const Badge(
-            isLabelVisible: false,
-            child: Icon(Icons.directions_bike, size: 60)),
+        flexibleSpace: Container(
+          alignment: Alignment.centerLeft,
+          child: Image.asset('assets/logo.png', fit: BoxFit.contain)
+        )
       ),
       extendBodyBehindAppBar: true,
       body: Stack(children: [
@@ -53,8 +151,7 @@ class AppViewState extends State<AppView> {
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
-              icon:
-                  Badge(isLabelVisible: false, child: Icon(Icons.location_pin)),
+              icon: Badge(isLabelVisible: false, child: Icon(Icons.location_pin)),
               label: 'Map'),
           BottomNavigationBarItem(
               icon: Badge(isLabelVisible: false, child: Icon(Icons.settings)),

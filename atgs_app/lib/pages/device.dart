@@ -14,10 +14,6 @@ class DevicePage extends StatefulWidget {
 }
 
 class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMixin {
-  int? batteryPercentage;
-  bool? batteryCharging;
-  bool? signalConnection;
-  DateTime? date;
 
   late AnimationController refreshButtonController;
   static ValueNotifier<bool> stopRefreshingAnimationNotifier = ValueNotifier<bool>(false);
@@ -36,27 +32,26 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
 
   void updateStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    
+
     if(AppViewState.selectedIndex == 1) {
       await prefs.reload();
       int? battery = prefs.getInt("battery");
       bool? charging = prefs.getBool("charging");
       String? stringDate = prefs.getString("status_utc_time");
 
-      debugPrint("-UPDATE- Battery: $battery");
-      debugPrint("-UPDATE- Charging: $charging");
-      debugPrint("-UPDATE- Date: $stringDate");
+      // debugPrint("-UPDATE- Battery: $battery");
+      // debugPrint("-UPDATE- Charging: $charging");
+      // debugPrint("-UPDATE- Date: $stringDate");
 
       if (battery != null && charging != null && mounted) {
         setState(() {
           batteryPercentage = battery;
           batteryCharging = charging;
           if(stringDate != null) {
-            DateTime parsedDate = DateFormat("yyyy-MM-dd HH:mm:ss").parse(stringDate, true).toLocal();
-            date = parsedDate;
+            statusUpdateDate = DateFormat("yyyy-MM-dd HH:mm:ss").parse(stringDate, true).toLocal();
 
             DateTime now = DateTime.now();
-            Duration difference = now.difference(parsedDate);
+            Duration difference = now.difference(statusUpdateDate!);
 
             if (difference.inMinutes > 1) {
               signalConnection = false;
@@ -176,7 +171,7 @@ void didChangeDependencies() {
                               onChanged: (bool value) {
                                 setState(() {
                                   deviceArmed = value;
-                                  sendMessage("$deviceArmed");
+                                  sendMessage(deviceArmed);
                                   saveDeviceArmedStatus(deviceArmed);
                                 });
                               }
@@ -203,7 +198,7 @@ void didChangeDependencies() {
                           size: 45
                         )
                       ),
-                      Text( (signalConnection != null) ? ((signalConnection!) ? "" : "Last update: ${DateFormat('dd.MM.yyyy, HH:mm').format(date!)}") : "", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 16, fontWeight: FontWeight.w500, fontStyle: FontStyle.italic))
+                      Text( (signalConnection != null) ? ((signalConnection!) ? "" : "Last update: ${DateFormat('dd.MM.yyyy, HH:mm').format(statusUpdateDate!)}") : "", style: TextStyle(foreground: Paint() ..color = Colors.white, fontSize: 16, fontWeight: FontWeight.w500, fontStyle: FontStyle.italic))
                     ]
                   )
                 ),         
@@ -219,7 +214,7 @@ void didChangeDependencies() {
                       Badge(
                         isLabelVisible: false, 
                         child: Icon( (signalConnection != null) ? ((signalConnection!) ? Icons.signal_cellular_alt_rounded : Icons.signal_cellular_off_rounded) : Icons.signal_cellular_nodata, 
-                          color: (signalConnection != null) ? ((signalConnection!) ? darkBlue : Colors.red) : Colors.orange, 
+                          color: (signalConnection != null) ? ((signalConnection!) ? darkestBlue : Colors.red) : Colors.orange, 
                           size: 45
                         )
                       )                  

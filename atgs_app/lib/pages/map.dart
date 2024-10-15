@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
@@ -78,14 +79,15 @@ class MapPageState extends State<MapPage> {
       double? longitude = prefs.getDouble("longitude");
       String? stringDate = prefs.getString("utc_time");
 
-      debugPrint("-UPDATE- Latitude: $latitude");
-      debugPrint("-UPDATE- Longitude: $longitude");
-      debugPrint("-UPDATE- Date: $stringDate");
+      // debugPrint("-UPDATE- Latitude: $latitude");
+      // debugPrint("-UPDATE- Longitude: $longitude");
+      // debugPrint("-UPDATE- Date: $stringDate");
 
       if (latitude != null && longitude != null && mounted) {
         Address address = await geoCode.reverseGeocoding(
             latitude: latitude, longitude: longitude);
 
+        if(mounted) {
         setState(() {
           if (showActualPosition) mapLatLng = LatLng(latitude, longitude);
 
@@ -94,19 +96,29 @@ class MapPageState extends State<MapPage> {
                 .parse(stringDate, true)
                 .toLocal();
 
-            if (parsedDate != timeStamp) {
+            
+            if(timeStamp == null || parsedDate.difference(timeStamp!).inMinutes >= 5) {
               timeStamp = parsedDate;
-
-              addressHistory.add(
-                  "${address.streetAddress ?? ''} ${address.streetNumber ?? ''}, ${address.postal != null ? '${address.postal!.substring(0, 2)}-${address.postal!.substring(2, 5)}' : ''} ${address.city} - ${DateFormat("dd-MM-yyyy HH:mm").format(parsedDate)}");
+              
+              if(address.streetAddress != null) {
+                if(address.streetAddress!.startsWith("Throttled!")) {
+                  addressHistory.add(LatLng(latitude, longitude).toString());
+                }
+                else {
+                  addressHistory.add(
+                      "${address.streetAddress ?? ''} ${address.streetNumber ?? ''}, ${address.postal != null ? '${address.postal!.substring(0, 2)}-${address.postal!.substring(2, 5)}' : ''} ${address.city} - ${DateFormat("dd-MM-yyyy HH:mm").format(parsedDate)}");
+                }
+              }
               locationHistory.add(LatLng(latitude, longitude));
+              
               saveLocationHistory();
             }
           }
         });
-      }
-      if (showActualPosition) {
-        mapController.move(mapLatLng, mapZoom);
+        }
+        if (showActualPosition && mounted) {
+          mapController.move(mapLatLng, mapZoom);
+        }
       }
     }
   }
@@ -134,7 +146,7 @@ class MapPageState extends State<MapPage> {
       body: SlidingUpPanel(
         minHeight: 65,
         maxHeight:
-            MediaQuery.of(context).size.height * 0.30, // 30% of the screen
+            MediaQuery.of(context).size.height * 0.30,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         panel: _buildLocationHistoryPanel(),
         body: Stack(children: [
@@ -222,7 +234,7 @@ class MapPageState extends State<MapPage> {
             children: [
               const Text(
                 'Location History',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: backgroundColor),
               ),
               ElevatedButton(
                   onPressed: () {
@@ -235,11 +247,13 @@ class MapPageState extends State<MapPage> {
                       backgroundColor: backgroundColor),
                   child: const Text(
                     "Show on map",
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16),
                   ))
             ],
           ),
-          const Divider(),
+          const Divider(
+            color: backgroundColor,
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: addressHistory.length,
@@ -248,7 +262,7 @@ class MapPageState extends State<MapPage> {
                   leading:
                       const Icon(Icons.location_on, color: backgroundColor),
                   title: Text(addressHistory[index],
-                      style: const TextStyle(fontSize: 16)),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   onTap: () {
                     setState(() {
                       showActualPosition = false;
@@ -290,7 +304,7 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
       timestampBoxOpacity = 1.0;
     });
 
-    Timer(const Duration(seconds: 1), () {
+    Timer(const Duration(seconds: 2), () {
       if (AppViewState.selectedIndex == 0) {
         setState(() {
           timestampBoxOpacity = 0.0;
@@ -304,11 +318,21 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
         });
       }
     });
+
+    Clipboard.setData(ClipboardData(text: "${widget.location.latitude}, ${widget.location.longitude}"));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Coordinates copied to clipboard", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, fontStyle: FontStyle.italic)), 
+        duration: Duration(seconds: 1),
+        backgroundColor: backgroundColor
+      )
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       onTap: onTapMarker,
       child: Stack(
         alignment: Alignment.center,
@@ -316,16 +340,19 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
         children: [
           Center(
             child: Stack(alignment: Alignment.center, children: [
-              const Icon(Icons.place, color: backgroundColor, size: 60),
+              const Positioned(
+                top: -5,
+                child: Icon(Icons.place, color: backgroundColor, size: 60)
+              ),
               Positioned(
-                  top: 10,
+                  top: 5,
                   child: Container(
                       width: 30,
                       height: 30,
                       decoration: const BoxDecoration(
                           shape: BoxShape.circle, color: backgroundColor))),
               const Positioned(
-                top: 7,
+                top: 2,
                 child: Icon(
                   Icons.pedal_bike,
                   color: Colors.white,
@@ -341,7 +368,7 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
                   duration: const Duration(seconds: 1),
                   opacity: timestampBoxOpacity,
                   child: Container(
-                    padding: const EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(4.0),
                     decoration: BoxDecoration(
                       color: backgroundColor,
                       borderRadius: BorderRadius.circular(10.0),
@@ -369,7 +396,8 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
                       ],
                     ),
                   ),
-                ))
+                )
+              )
         ],
       ),
     );

@@ -71,20 +71,20 @@ class ProfilePageState extends State<ProfilePage> {
   
   
     if (datePickerController.text.isNotEmpty) {
-    if( DateFormat("dd MMMM, yyyy").parse(datePickerController.text, true).isBefore(DateTime.now())){
-      setState(() {
-        subscriptionDateTextColor = Colors.red; 
-        subscriptionDateWarningIcon = const Icon(Icons.warning, color: Colors.red);
-        });
+      if( DateFormat("dd MMMM, yyyy").parse(datePickerController.text, true).isBefore(DateTime.now())){
+        setState(() {
+          subscriptionDateTextColor = Colors.red; 
+          subscriptionDateWarningIcon = const Icon(Icons.warning, color: Colors.red);
+          });
+      }
+      else {
+        setState(() {
+          subscriptionDateTextColor = Colors.white; 
+          subscriptionDateWarningIcon = const Icon(Icons.check_circle_rounded, color: Color.fromARGB(255, 1, 109, 5));
+          });
+      }
+      savesubscriptionDateTextColorAndIcon(subscriptionDateTextColor, subscriptionDateWarningIcon);
     }
-    else {
-      setState(() {
-        subscriptionDateTextColor = Colors.white; 
-        subscriptionDateWarningIcon = const Icon(Icons.check_circle_rounded, color: Color.fromARGB(255, 1, 109, 5));
-        });
-    }
-    savesubscriptionDateTextColorAndIcon(subscriptionDateTextColor, subscriptionDateWarningIcon);
-  }
   }
 
   void handleNumberControllers() {

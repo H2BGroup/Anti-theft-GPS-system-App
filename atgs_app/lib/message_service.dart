@@ -1,3 +1,4 @@
+import "package:atgs_app/app.dart";
 import "package:dart_amqp/dart_amqp.dart";
 import "package:flutter/material.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -23,8 +24,8 @@ void receiveMessage() async {
 
       if (message.payloadAsJson['type'] == 'location') {
         if (message.payloadAsJson['latitude'] != null && message.payloadAsJson['longitude'] != null && message.payloadAsJson['utc_time'] != null) {
-          double latitude = double.parse(message.payloadAsJson['latitude']);
-          double longitude = double.parse(message.payloadAsJson['longitude']);
+          double latitude = message.payloadAsJson['latitude'];
+          double longitude = message.payloadAsJson['longitude'];
           String dateTime = message.payloadAsJson['utc_time'];
 
           debugPrint("-RECEIVED- Latitude: $latitude");
@@ -34,7 +35,6 @@ void receiveMessage() async {
           saveLocation(latitude, longitude, dateTime);
         }
       }
-
       if (message.payloadAsJson['type'] == 'status') {
         if (message.payloadAsJson['percent'] != null && message.payloadAsJson['charging'] != null) {
           int battery = (message.payloadAsJson['percent']).round();
@@ -47,6 +47,12 @@ void receiveMessage() async {
 
           saveStatus(battery, charging, dateTime);
         }
+      }
+      if (message.payloadAsJson['type'] == 'movement_detected') {
+        movementDetected = true;
+        String dateTime = message.payloadAsJson['utc_time'];
+
+        debugPrint("-MOVEMENT DETECTED!- Date: $dateTime");
       }
     });
   }
