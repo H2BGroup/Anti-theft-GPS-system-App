@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:atgs_app/app.dart';
 import 'package:atgs_app/message_service.dart';
 import 'package:flutter/material.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,6 +22,7 @@ class DevicePageState extends State<DevicePage> with SingleTickerProviderStateMi
   void saveDeviceArmedStatus(bool armed) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool("deviceArmedKey", armed);
+    await HomeWidget.updateWidget(name: 'RemoteWidgetProvider');
   }
 
   void loadSavedData() async {

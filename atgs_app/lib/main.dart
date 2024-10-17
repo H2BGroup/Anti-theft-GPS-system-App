@@ -1,9 +1,16 @@
+import 'package:atgs_app/pages/introduction.dart';
 import 'package:flutter/material.dart';
 import 'package:atgs_app/app.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:atgs_app/pages/introduction.dart';
+import 'message_service.dart';
+import 'package:introduction_screen/introduction_screen.dart';
+import 'package:flutter_isolate/flutter_isolate.dart';
 
-void main() {
+Future<void> main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  FlutterIsolate.spawn(startMessageService, null);
+  //await HomeWidget.registerInteractivityCallback(interactiveCallback);
   runApp(const MyApp());
 }
 

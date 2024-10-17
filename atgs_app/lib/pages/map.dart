@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +12,11 @@ import 'package:atgs_app/message_service.dart';
 import 'package:atgs_app/app.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:geocode/geocode.dart';
+
+import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -30,6 +38,43 @@ class MapPageState extends State<MapPage> {
   final MapController mapController = MapController();
   GeoCode geoCode = GeoCode();
 
+  GlobalKey repaintBoundaryKey = GlobalKey();
+
+  @pragma('vm:entry-point')
+  Future<void> interactiveCallback(Uri? uri) async {
+    if (uri?.host == 'armed') {
+      print("armed!!!!");
+    } else if (uri?.host == 'clear') {
+      print("XDDDDDDD");
+    }
+  }
+
+  Future<void> captureMap() async {
+    try {
+      RenderRepaintBoundary boundary = repaintBoundaryKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage();
+      final directory = (await getApplicationDocumentsDirectory()).path;
+      ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData != null) {
+        final buffer = byteData.buffer.asUint8List();
+        File imgFile = File('$directory/map_screenshot.png');
+        await imgFile.writeAsBytes(buffer);
+        saveImagePath('$directory/map_screenshot.png');
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void saveImagePath(String path) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('filename', path);
+
+    await HomeWidget.updateWidget(name: 'RemoteWidgetProvider');
+  }
+
   Future<void> showDeviceLocation() async {
     if (!deviceArmed) sendMessage("location");
 
@@ -40,7 +85,8 @@ class MapPageState extends State<MapPage> {
   Future<void> loadLocationHistory() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    List<String>? storedLocationHistory = prefs.getStringList("locationHistory");
+    List<String>? storedLocationHistory =
+        prefs.getStringList("locationHistory");
     List<String>? storedAddressHistory = prefs.getStringList("addressHistory");
 
     if (storedLocationHistory != null) {
@@ -150,47 +196,50 @@ class MapPageState extends State<MapPage> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         panel: _buildLocationHistoryPanel(),
         body: Stack(children: [
-          FlutterMap(
-              mapController: mapController,
-              options: MapOptions(
-                center: mapLatLng,
-                zoom: mapZoom,
-                maxZoom: 18,
-                minZoom: 11,
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate:
-                      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                  subdomains: const ['a', 'b', 'c'],
-                  userAgentPackageName: 'com.example.app',
+          RepaintBoundary(
+            key: repaintBoundaryKey,
+            child: FlutterMap(
+                mapController: mapController,
+                options: MapOptions(
+                  center: mapLatLng,
+                  zoom: mapZoom,
+                  maxZoom: 18,
+                  minZoom: 11,
                 ),
-                PolylineLayer(
-                  polylines: [
-                    if (showPolyline)
-                      Polyline(
-                        strokeWidth: 4,
-                        points: locationHistory,
-                        color: Colors.blue,
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    subdomains: const ['a', 'b', 'c'],
+                    userAgentPackageName: 'com.example.app',
+                  ),
+                  PolylineLayer(
+                    polylines: [
+                      if (showPolyline)
+                        Polyline(
+                          strokeWidth: 4,
+                          points: locationHistory,
+                          color: Colors.blue,
+                        ),
+                    ],
+                  ),
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: mapLatLng,
+                        width: 80,
+                        height: 80,
+                        builder: (context) {
+                          return CustomMarkerWidget(
+                            location: mapLatLng,
+                            timestamp: timeStamp,
+                          );
+                        },
                       ),
-                  ],
-                ),
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: mapLatLng,
-                      width: 80,
-                      height: 80,
-                      builder: (context) {
-                        return CustomMarkerWidget(
-                          location: mapLatLng,
-                          timestamp: timeStamp,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ]),
+                    ],
+                  ),
+                ]),
+          ),
           Align(
             alignment: Alignment.topCenter,
             child: Padding(
@@ -219,6 +268,12 @@ class MapPageState extends State<MapPage> {
             ),
           )
         ]),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          captureMap();
+        },
+        child: Icon(Icons.camera),
       ),
     );
   }
