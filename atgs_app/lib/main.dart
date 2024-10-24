@@ -1,16 +1,16 @@
+import 'package:atgs_app/background_service.dart';
 import 'package:atgs_app/pages/introduction.dart';
 import 'package:flutter/material.dart';
 import 'package:atgs_app/app.dart';
-import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'message_service.dart';
-import 'package:introduction_screen/introduction_screen.dart';
-import 'package:flutter_isolate/flutter_isolate.dart';
 
-Future<void> main() async{
+import 'notifications.dart';
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  FlutterIsolate.spawn(startMessageService, null);
   //await HomeWidget.registerInteractivityCallback(interactiveCallback);
+  await initializeService();
+  initNotifications(flutterLocalNotificationsPlugin);
   runApp(const MyApp());
 }
 
@@ -34,7 +34,7 @@ class MyAppState extends State<MyApp> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? savedisInitialized = prefs.getBool("isInitialized");
 
-    if(savedisInitialized != null) {
+    if (savedisInitialized != null) {
       setState(() {
         isInitialized = savedisInitialized;
       });
@@ -44,12 +44,11 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData( 
-        scaffoldBackgroundColor: backgroundColor,
-        textSelectionTheme: const TextSelectionThemeData(selectionHandleColor: darkestBlue)
-      ),
-      home: (isInitialized) ? const AppView() : const IntroductionView()
-    );
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+            scaffoldBackgroundColor: backgroundColor,
+            textSelectionTheme: const TextSelectionThemeData(
+                selectionHandleColor: darkestBlue)),
+        home: (isInitialized) ? const AppView() : const IntroductionView());
   }
 }
