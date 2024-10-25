@@ -1,13 +1,8 @@
-import 'package:atgs_app/app.dart';
 import 'package:atgs_app/notifications.dart';
 import 'package:dart_amqp/dart_amqp.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
-
-FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
 
 ConnectionSettings settings = ConnectionSettings(
     host: host,
@@ -87,6 +82,9 @@ void sendMessage(dynamic type) async {
     queue.publish(message);
     debugPrint("Message: $message");
   }
+
+  channel.close();
+  client.close();
 }
 
 void saveLocation(double latitude, double longitude, String dateTime) async {
