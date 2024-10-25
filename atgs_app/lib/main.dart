@@ -1,16 +1,18 @@
 import 'package:atgs_app/background_service.dart';
+import 'package:atgs_app/pages/device.dart';
 import 'package:atgs_app/pages/introduction.dart';
 import 'package:flutter/material.dart';
 import 'package:atgs_app/app.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'notifications.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //await HomeWidget.registerInteractivityCallback(interactiveCallback);
   await initializeService();
   initNotifications(flutterLocalNotificationsPlugin);
+  await HomeWidget.registerInteractivityCallback(interactiveCallback);
   runApp(const MyApp());
 }
 
