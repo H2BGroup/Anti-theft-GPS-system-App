@@ -40,11 +40,13 @@ dependencies:
   latlong2: ^0.9.0
   shared_preferences: ^2.3.1
   dart_amqp: ^0.3.1
-  flutter_isolate: ^2.0.4
   introduction_screen: ^3.1.14
   sliding_up_panel: ^2.0.0+1
   geocode: ^1.0.3
   flutter_local_notifications: ^17.2.3
+  home_widget: ^0.7.0
+  path_provider: ^2.1.4
+  flutter_background_service: ^5.0.10
 
 dev_dependencies:
   flutter_test:

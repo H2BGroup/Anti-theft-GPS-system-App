@@ -40,7 +40,8 @@ class MapPageState extends State<MapPage> {
   Future<void> loadLocationHistory() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    List<String>? storedLocationHistory = prefs.getStringList("locationHistory");
+    List<String>? storedLocationHistory =
+        prefs.getStringList("locationHistory");
     List<String>? storedAddressHistory = prefs.getStringList("addressHistory");
 
     if (storedLocationHistory != null) {
@@ -87,34 +88,33 @@ class MapPageState extends State<MapPage> {
         Address address = await geoCode.reverseGeocoding(
             latitude: latitude, longitude: longitude);
 
-        if(mounted) {
-        setState(() {
-          if (showActualPosition) mapLatLng = LatLng(latitude, longitude);
+        if (mounted) {
+          setState(() {
+            if (showActualPosition) mapLatLng = LatLng(latitude, longitude);
 
-          if (stringDate != null) {
-            DateTime parsedDate = DateFormat("yyyy-MM-dd HH:mm:ss")
-                .parse(stringDate, true)
-                .toLocal();
+            if (stringDate != null) {
+              DateTime parsedDate = DateFormat("yyyy-MM-dd HH:mm:ss")
+                  .parse(stringDate, true)
+                  .toLocal();
 
-            
-            if(timeStamp == null || parsedDate.difference(timeStamp!).inMinutes >= 5) {
-              timeStamp = parsedDate;
-              
-              if(address.streetAddress != null) {
-                if(address.streetAddress!.startsWith("Throttled!")) {
-                  addressHistory.add(LatLng(latitude, longitude).toString());
+              if (timeStamp == null ||
+                  parsedDate.difference(timeStamp!).inMinutes >= 5) {
+                timeStamp = parsedDate;
+
+                if (address.streetAddress != null) {
+                  if (address.streetAddress!.startsWith("Throttled!")) {
+                    addressHistory.add(LatLng(latitude, longitude).toString());
+                  } else {
+                    addressHistory.add(
+                        "${address.streetAddress ?? ''} ${address.streetNumber ?? ''}, ${address.postal != null ? '${address.postal!.substring(0, 2)}-${address.postal!.substring(2, 5)}' : ''} ${address.city} - ${DateFormat("dd-MM-yyyy HH:mm").format(parsedDate)}");
+                  }
                 }
-                else {
-                  addressHistory.add(
-                      "${address.streetAddress ?? ''} ${address.streetNumber ?? ''}, ${address.postal != null ? '${address.postal!.substring(0, 2)}-${address.postal!.substring(2, 5)}' : ''} ${address.city} - ${DateFormat("dd-MM-yyyy HH:mm").format(parsedDate)}");
-                }
+                locationHistory.add(LatLng(latitude, longitude));
+
+                saveLocationHistory();
               }
-              locationHistory.add(LatLng(latitude, longitude));
-              
-              saveLocationHistory();
             }
-          }
-        });
+          });
         }
         if (showActualPosition && mounted) {
           mapController.move(mapLatLng, mapZoom);
@@ -145,8 +145,7 @@ class MapPageState extends State<MapPage> {
     return Scaffold(
       body: SlidingUpPanel(
         minHeight: 65,
-        maxHeight:
-            MediaQuery.of(context).size.height * 0.30,
+        maxHeight: MediaQuery.of(context).size.height * 0.30,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         panel: _buildLocationHistoryPanel(),
         body: Stack(children: [
@@ -234,7 +233,10 @@ class MapPageState extends State<MapPage> {
             children: [
               const Text(
                 'Location History',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: backgroundColor),
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: backgroundColor),
               ),
               ElevatedButton(
                   onPressed: () {
@@ -247,7 +249,10 @@ class MapPageState extends State<MapPage> {
                       backgroundColor: backgroundColor),
                   child: const Text(
                     "Show on map",
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16),
                   ))
             ],
           ),
@@ -262,7 +267,8 @@ class MapPageState extends State<MapPage> {
                   leading:
                       const Icon(Icons.location_on, color: backgroundColor),
                   title: Text(addressHistory[index],
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w600)),
                   onTap: () {
                     setState(() {
                       showActualPosition = false;
@@ -319,14 +325,16 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
       }
     });
 
-    Clipboard.setData(ClipboardData(text: "${widget.location.latitude}, ${widget.location.longitude}"));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Coordinates copied to clipboard", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, fontStyle: FontStyle.italic)), 
+    Clipboard.setData(ClipboardData(
+        text: "${widget.location.latitude}, ${widget.location.longitude}"));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Coordinates copied to clipboard",
+            style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                fontStyle: FontStyle.italic)),
         duration: Duration(seconds: 1),
-        backgroundColor: backgroundColor
-      )
-    );
+        backgroundColor: backgroundColor));
   }
 
   @override
@@ -341,9 +349,8 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
           Center(
             child: Stack(alignment: Alignment.center, children: [
               const Positioned(
-                top: -5,
-                child: Icon(Icons.place, color: backgroundColor, size: 60)
-              ),
+                  top: -5,
+                  child: Icon(Icons.place, color: backgroundColor, size: 60)),
               Positioned(
                   top: 5,
                   child: Container(
@@ -396,8 +403,7 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
                       ],
                     ),
                   ),
-                )
-              )
+                ))
         ],
       ),
     );

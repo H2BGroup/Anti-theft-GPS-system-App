@@ -1,8 +1,8 @@
-import "package:atgs_app/app.dart";
-import "package:dart_amqp/dart_amqp.dart";
-import "package:flutter/material.dart";
-import "package:shared_preferences/shared_preferences.dart";
-import "config.dart";
+import 'package:atgs_app/notifications.dart';
+import 'package:dart_amqp/dart_amqp.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'config.dart';
 
 ConnectionSettings settings = ConnectionSettings(
     host: host,
@@ -23,7 +23,9 @@ void receiveMessage() async {
       debugPrint(" [x] Received json: ${message.payloadAsJson}");
 
       if (message.payloadAsJson['type'] == 'location') {
-        if (message.payloadAsJson['latitude'] != null && message.payloadAsJson['longitude'] != null && message.payloadAsJson['utc_time'] != null) {
+        if (message.payloadAsJson['latitude'] != null &&
+            message.payloadAsJson['longitude'] != null &&
+            message.payloadAsJson['utc_time'] != null) {
           double latitude = message.payloadAsJson['latitude'];
           double longitude = message.payloadAsJson['longitude'];
           String dateTime = message.payloadAsJson['utc_time'];
@@ -36,9 +38,10 @@ void receiveMessage() async {
         }
       }
       if (message.payloadAsJson['type'] == 'status') {
-        if (message.payloadAsJson['percent'] != null && message.payloadAsJson['charging'] != null) {
+        if (message.payloadAsJson['percent'] != null &&
+            message.payloadAsJson['charging'] != null) {
           int battery = (message.payloadAsJson['percent']).round();
-          bool charging = message.payloadAsJson['charging']; 
+          bool charging = message.payloadAsJson['charging'];
           String dateTime = message.payloadAsJson['utc_time'];
 
           debugPrint("-RECEIVED- Battery: $battery");
@@ -49,8 +52,9 @@ void receiveMessage() async {
         }
       }
       if (message.payloadAsJson['type'] == 'movement_detected') {
-        movementDetected = true;
         String dateTime = message.payloadAsJson['utc_time'];
+
+        showMovementDectectedNotification(flutterLocalNotificationsPlugin);
 
         debugPrint("-MOVEMENT DETECTED!- Date: $dateTime");
       }
@@ -62,20 +66,25 @@ void sendMessage(dynamic type) async {
   Client client = Client(settings: settings);
   Channel channel = await client.channel();
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? deviceNumber = prefs.getString("deviceNumber");
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? deviceNumber = prefs.getString("deviceNumber");
 
-    if (deviceNumber != null) { 
-      Queue queue = await channel.queue(deviceNumber, durable: true);
+  if (deviceNumber != null) {
+    Queue queue = await channel.queue(deviceNumber, durable: true);
 
-      Map<String, dynamic> message;
-      if(type == "status" || type == "location") { message = {"request": type}; }
-      
-      else { message = {"armed": type}; }
-      
-      queue.publish(message);
-      debugPrint("Message: $message");
+    Map<String, dynamic> message;
+    if (type == "status" || type == "location") {
+      message = {"request": type};
+    } else {
+      message = {"armed": type};
     }
+
+    queue.publish(message);
+    debugPrint("Message: $message");
+  }
+
+  channel.close();
+  client.close();
 }
 
 void saveLocation(double latitude, double longitude, String dateTime) async {
