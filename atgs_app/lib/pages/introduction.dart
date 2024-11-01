@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:atgs_app/app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class IntroductionView extends StatefulWidget {
   const IntroductionView({super.key});
@@ -18,6 +19,7 @@ class IntroductionViewState extends State<IntroductionView> {
   final introKey = GlobalKey<IntroductionScreenState>();
   int currentPageIndex = 0;
   bool nextButtonAllowed = false;
+  bool notificationPermissionGranted = false;
 
   void saveInitializedStatus(bool isInitialized) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -220,11 +222,46 @@ class IntroductionViewState extends State<IntroductionView> {
     ];
   }
 
+  Future<void> requestNotificationPermission() async {
+
+  while (!notificationPermissionGranted) {
+    PermissionStatus status = await Permission.notification.status;
+
+    if (status.isGranted) {
+      notificationPermissionGranted = true;
+      return;
+    } 
+    else {
+      if (mounted) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: const Text("Enable notifications"),
+            content: const Text("This app needs to send you notifications in order to work properly. Please enable notifications in the next popup window or in your phone settings"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      }
+      await Permission.notification.request();
+    }
+  }
+}
+
+
   @override
   void initState() {
     super.initState(); 
     handleNumberControllers();
     loadSavedData();
+    requestNotificationPermission();
   }
 
   @override
