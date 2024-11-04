@@ -8,7 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atgs_app/message_service.dart';
 import 'package:atgs_app/app.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:geocode/geocode.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -28,7 +27,6 @@ class MapPageState extends State<MapPage> {
   List<LatLng> locationHistory = [];
 
   final MapController mapController = MapController();
-  GeoCode geoCode = GeoCode();
 
   Future<void> showDeviceLocation() async {
     if (!deviceArmed) sendMessage("location");
@@ -46,8 +44,8 @@ class MapPageState extends State<MapPage> {
 
     if (storedLocationHistory != null) {
       setState(() {
-        locationHistory = storedLocationHistory.map((loc) {
-          var coords = loc.split(",");
+        locationHistory = storedLocationHistory.map((stringCoords) {
+          var coords = stringCoords.split(",");
           return LatLng(double.parse(coords[0]), double.parse(coords[1]));
         }).toList();
       });
@@ -63,11 +61,6 @@ class MapPageState extends State<MapPage> {
   Future<void> saveLocationHistory() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    List<String> storedLocationHistory = locationHistory.map((latLng) {
-      return '${latLng.latitude},${latLng.longitude}';
-    }).toList();
-
-    await prefs.setStringList("locationHistory", storedLocationHistory);
     await prefs.setStringList("addressHistory", addressHistory);
   }
 
@@ -85,35 +78,16 @@ class MapPageState extends State<MapPage> {
       // debugPrint("-UPDATE- Date: $stringDate");
 
       if (latitude != null && longitude != null && mounted) {
-        Address address = await geoCode.reverseGeocoding(
-            latitude: latitude, longitude: longitude);
-
         if (mounted) {
           setState(() {
             if (showActualPosition) mapLatLng = LatLng(latitude, longitude);
 
             if (stringDate != null) {
-              DateTime parsedDate = DateFormat("yyyy-MM-dd HH:mm:ss")
+              timeStamp = DateFormat("yyyy-MM-dd HH:mm:ss")
                   .parse(stringDate, true)
                   .toLocal();
-
-              if (timeStamp == null ||
-                  parsedDate.difference(timeStamp!).inMinutes >= 5) {
-                timeStamp = parsedDate;
-
-                if (address.streetAddress != null) {
-                  if (address.streetAddress!.startsWith("Throttled!")) {
-                    addressHistory.add(LatLng(latitude, longitude).toString());
-                  } else {
-                    addressHistory.add(
-                        "${address.streetAddress ?? ''} ${address.streetNumber ?? ''}, ${address.postal != null ? '${address.postal!.substring(0, 2)}-${address.postal!.substring(2, 5)}' : ''} ${address.city} - ${DateFormat("dd-MM-yyyy HH:mm").format(parsedDate)}");
-                  }
-                }
-                locationHistory.add(LatLng(latitude, longitude));
-
-                saveLocationHistory();
-              }
             }
+            loadLocationHistory();
           });
         }
         if (showActualPosition && mounted) {
