@@ -344,7 +344,7 @@ class CustomMarkerWidgetState extends State<CustomMarkerWidget> {
           ),
           if (showTimestamp)
             Positioned(
-                bottom: 70,
+                bottom: 90,
                 child: AnimatedOpacity(
                   duration: const Duration(seconds: 1),
                   opacity: timestampBoxOpacity,
