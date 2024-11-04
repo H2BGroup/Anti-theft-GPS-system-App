@@ -6,6 +6,9 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 
+const MAX_HISTORY_LENGTH = 10;
+const TIME_DIFFERENCE = 5;
+
 ConnectionSettings settings = ConnectionSettings(
     host: host,
     virtualHost: user,
@@ -112,11 +115,16 @@ void saveLocation(double latitude, double longitude, String dateTime) async {
     DateTime lastDate =
         DateFormat("yyyy-MM-dd HH:mm:ss").parse(stringDate, true).toLocal();
 
-    if (parsedDate.difference(lastDate).inMinutes >= 5) {
+    if (parsedDate.difference(lastDate).inMinutes >= TIME_DIFFERENCE) {
       List<Placemark> placemark =
           await placemarkFromCoordinates(latitude, longitude);
 
       addressHistory ??= [];
+
+      if (addressHistory.length >= MAX_HISTORY_LENGTH) {
+        addressHistory.removeAt(0);
+      }
+
       addressHistory.add(
           "${placemark[0].street}${placemark[0].locality != "" ? ", ${placemark[0].postalCode} ${placemark[0].locality}" : ""} - ${DateFormat("dd.MM.yyyy HH:mm").format(parsedDate)}");
 
@@ -127,6 +135,11 @@ void saveLocation(double latitude, double longitude, String dateTime) async {
         await placemarkFromCoordinates(latitude, longitude);
 
     addressHistory ??= [];
+
+    if (addressHistory.length >= MAX_HISTORY_LENGTH) {
+      addressHistory.removeAt(0);
+    }
+
     addressHistory.add(
         "${placemark[0].street}${placemark[0].locality != "" ? ", ${placemark[0].postalCode} ${placemark[0].locality}" : ""} - ${DateFormat("dd.MM.yyyy HH:mm").format(parsedDate)}");
 
