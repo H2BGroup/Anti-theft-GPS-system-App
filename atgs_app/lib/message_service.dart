@@ -6,8 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 
-const MAX_HISTORY_LENGTH = 10;
-const TIME_DIFFERENCE = 5;
+const maxHistoryLength = 120;
+const timeDifference = 1;
 
 ConnectionSettings settings = ConnectionSettings(
     host: host,
@@ -100,14 +100,6 @@ void saveLocation(double latitude, double longitude, String dateTime) async {
   await prefs.setDouble("longitude", longitude);
   await prefs.setString("utc_time", dateTime);
 
-  List<String>? locationHistory = prefs.getStringList("locationHistory");
-  List<String>? addressHistory = prefs.getStringList("addressHistory");
-
-  locationHistory ??= [];
-  locationHistory.add('$latitude,$longitude');
-
-  await prefs.setStringList("locationHistory", locationHistory);
-
   DateTime parsedDate =
       DateFormat("yyyy-MM-dd HH:mm:ss").parse(dateTime, true).toLocal();
 
@@ -115,35 +107,11 @@ void saveLocation(double latitude, double longitude, String dateTime) async {
     DateTime lastDate =
         DateFormat("yyyy-MM-dd HH:mm:ss").parse(stringDate, true).toLocal();
 
-    if (parsedDate.difference(lastDate).inMinutes >= TIME_DIFFERENCE) {
-      List<Placemark> placemark =
-          await placemarkFromCoordinates(latitude, longitude);
-
-      addressHistory ??= [];
-
-      if (addressHistory.length >= MAX_HISTORY_LENGTH) {
-        addressHistory.removeAt(0);
-      }
-
-      addressHistory.add(
-          "${placemark[0].street}${placemark[0].locality != "" ? ", ${placemark[0].postalCode} ${placemark[0].locality}" : ""} - ${DateFormat("dd.MM.yyyy HH:mm").format(parsedDate)}");
-
-      await prefs.setStringList("addressHistory", addressHistory);
+    if (parsedDate.difference(lastDate).inMinutes >= timeDifference) {
+      saveLocationAndAdressHistory(latitude, longitude, parsedDate);
     }
   } else {
-    List<Placemark> placemark =
-        await placemarkFromCoordinates(latitude, longitude);
-
-    addressHistory ??= [];
-
-    if (addressHistory.length >= MAX_HISTORY_LENGTH) {
-      addressHistory.removeAt(0);
-    }
-
-    addressHistory.add(
-        "${placemark[0].street}${placemark[0].locality != "" ? ", ${placemark[0].postalCode} ${placemark[0].locality}" : ""} - ${DateFormat("dd.MM.yyyy HH:mm").format(parsedDate)}");
-
-    await prefs.setStringList("addressHistory", addressHistory);
+    saveLocationAndAdressHistory(latitude, longitude, parsedDate);
   }
 }
 
@@ -152,4 +120,30 @@ void saveStatus(int battery, bool charging, String dateTime) async {
   await prefs.setInt("battery", battery);
   await prefs.setBool("charging", charging);
   await prefs.setString("status_utc_time", dateTime);
+}
+
+Future<void> saveLocationAndAdressHistory(
+    double latitude, double longitude, DateTime date) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  List<String>? locationHistory = prefs.getStringList("locationHistory");
+  List<String>? addressHistory = prefs.getStringList("addressHistory");
+
+  List<Placemark> placemark =
+      await placemarkFromCoordinates(latitude, longitude);
+
+  locationHistory ??= [];
+  addressHistory ??= [];
+
+  if (locationHistory.length >= maxHistoryLength) {
+    locationHistory.removeAt(0);
+    addressHistory.removeAt(0);
+  }
+
+  locationHistory.add('$latitude,$longitude');
+  addressHistory.add(
+      "${placemark[0].street}${placemark[0].locality != "" ? ", ${placemark[0].postalCode} ${placemark[0].locality}" : ""} - ${DateFormat("dd.MM.yyyy HH:mm").format(date)}");
+
+  await prefs.setStringList("locationHistory", locationHistory);
+  await prefs.setStringList("addressHistory", addressHistory);
 }
