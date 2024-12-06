@@ -1,6 +1,8 @@
+import 'package:atgs_app/background_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:atgs_app/app.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -23,7 +25,29 @@ class IntroductionViewState extends State<IntroductionView> {
 
   void saveInitializedStatus(bool isInitialized) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    final service = FlutterBackgroundService();
+
     await prefs.setBool("isInitialized", isInitialized);
+
+    if (await service.isRunning()) {
+      debugPrint("Service is running");
+    }
+    else{
+      debugPrint("Service is stopped");
+    }
+
+    service.invoke("stopService");
+
+    await Future.delayed(const Duration(seconds: 5));
+
+    if (await service.isRunning()) {
+      debugPrint("Service is running");
+    }
+    else{
+      debugPrint("Service is stopped");
+    }
+
+    service.startService();
   }
 
   void saveDeviceNumber(String number) async {

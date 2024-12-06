@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 
 const maxHistoryLength = 120;
-const timeDifference = 1;
+const timeDifference = 5;
 
 ConnectionSettings settings = ConnectionSettings(
     host: host,
@@ -17,13 +17,14 @@ ConnectionSettings settings = ConnectionSettings(
 void receiveMessage() async {
   Client client = Client(settings: settings);
   Channel channel = await client.channel();
+  channel = await channel.qos(0, 1);
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? ownersNumber = prefs.getString("ownersNumber");
 
   if (ownersNumber != null) {
     Queue queue = await channel.queue(ownersNumber, durable: true);
-    Consumer consumer = await queue.consume();
+    Consumer consumer = await queue.consume(noAck: false);
     consumer.listen((AmqpMessage message) {
       debugPrint(" [x] Received json: ${message.payloadAsJson}");
 
@@ -63,6 +64,8 @@ void receiveMessage() async {
 
         debugPrint("-MOVEMENT DETECTED!- Date: $dateTime");
       }
+
+      message.ack();
     });
   }
 }
@@ -94,7 +97,7 @@ void sendMessage(dynamic type) async {
 
 void saveLocation(double latitude, double longitude, String dateTime) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? stringDate = prefs.getString("utc_time");
+  String? stringDate = prefs.getString("history_utc_time");
 
   await prefs.setDouble("latitude", latitude);
   await prefs.setDouble("longitude", longitude);
@@ -105,8 +108,8 @@ void saveLocation(double latitude, double longitude, String dateTime) async {
 
   if (stringDate != null) {
     DateTime lastDate =
-        DateFormat("yyyy-MM-dd HH:mm:ss").parse(stringDate, true).toLocal();
-
+        DateFormat("yyyy-MM-dd HH:mm:ss").parse(stringDate, false);
+        
     if (parsedDate.difference(lastDate).inMinutes >= timeDifference) {
       saveLocationAndAdressHistory(latitude, longitude, parsedDate);
     }
@@ -146,4 +149,5 @@ Future<void> saveLocationAndAdressHistory(
 
   await prefs.setStringList("locationHistory", locationHistory);
   await prefs.setStringList("addressHistory", addressHistory);
+  await prefs.setString("history_utc_time", date.toString());
 }
